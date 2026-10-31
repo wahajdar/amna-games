@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amna's Games">
+<meta name="theme-color" content="#339af0">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>Wheels on the Bus</title>
+<link rel="stylesheet" href="../shared/toddler.css">
+<style>
+  body { background: linear-gradient(#74c0fc, #a5d8ff 60%, #d0ebff); }
+  .sun { position: absolute; top: 5vh; right: 10vw; width: calc(14 * var(--u)); height: calc(14 * var(--u)); border-radius: 50%;
+         background: radial-gradient(circle at 40% 35%, #fff6b0, #ffd43b); box-shadow: 0 0 60px 20px rgba(255,220,80,.5); }
+  .cloud { position: absolute; width: calc(18 * var(--u)); height: calc(7 * var(--u)); background: #fff; border-radius: 100px; animation: drift linear infinite; }
+  .cloud::before, .cloud::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+  .cloud::before { width: calc(9 * var(--u)); height: calc(9 * var(--u)); left: calc(3 * var(--u)); top: calc(-5 * var(--u)); }
+  .cloud::after { width: calc(7 * var(--u)); height: calc(7 * var(--u)); left: calc(9 * var(--u)); top: calc(-3.5 * var(--u)); }
+  @keyframes drift { from { transform: translateX(120vw); } to { transform: translateX(-30vw); } }
+
+  /* Scrolling town: a row of houses built in JS, duplicated so it loops */
+  .town { position: absolute; left: 0; right: 0; bottom: 30vh; height: 26vh; z-index: 0; overflow: hidden; }
+  .row { position: absolute; left: 0; bottom: 0; display: flex; align-items: flex-end; gap: calc(3 * var(--u)); padding-left: calc(3 * var(--u)); animation: town 16s linear infinite; }
+  @keyframes town { to { transform: translateX(-50%); } }
+  .house { position: relative; width: calc(14 * var(--u)); border: 4px solid #222; border-bottom: 0; border-radius: calc(1.5 * var(--u)) calc(1.5 * var(--u)) 0 0; box-shadow: inset 0 calc(1 * var(--u)) 0 rgba(255,255,255,.35);
+           background-image: repeating-linear-gradient(0deg, transparent 0 calc(2 * var(--u)), rgba(255,255,255,.55) calc(2 * var(--u)) calc(4 * var(--u)));
+           background-size: calc(3 * var(--u)) 100%; background-position: calc(2 * var(--u)) calc(-1 * var(--u)); background-repeat: repeat-x; }
+  .house::before { content: ''; position: absolute; left: -12%; right: -12%; top: calc(-3.5 * var(--u)); height: calc(3.5 * var(--u)); background: var(--roof); border: 4px solid #222; border-radius: calc(1 * var(--u)) calc(1 * var(--u)) 0 0; }
+  .grass { position: absolute; left: 0; right: 0; bottom: 22vh; height: 8vh; background: linear-gradient(#8ce99a, #51cf66); z-index: 0; }
+  .road { position: absolute; left: 0; right: 0; bottom: 0; height: 22vh; background: #495057; z-index: 0; }
+  .road::before { content: ''; position: absolute; left: 0; right: 0; top: 48%; height: 4%; background: repeating-linear-gradient(90deg, #ffd43b 0 calc(10 * var(--u)), transparent calc(10 * var(--u)) calc(18 * var(--u))); animation: dash .5s linear infinite; }
+  @keyframes dash { to { background-position: calc(-18 * var(--u)) 0; } }
+
+  /* The bus */
+  .bus { position: absolute; left: 50%; bottom: 9vh; width: calc(90 * var(--u)); height: calc(38 * var(--u)); transform: translateX(-50%); z-index: 2; animation: bob .6s ease-in-out infinite alternate; }
+  @keyframes bob { from { transform: translateX(-50%) translateY(0) } to { transform: translateX(-50%) translateY(calc(-.8 * var(--u))) } }
+  .bus.bump { animation: bump .5s; }
+  @keyframes bump { 0%,100% { transform: translateX(-50%) } 30% { transform: translateX(-50%) translateY(calc(-5 * var(--u))) rotate(-2deg) } 60% { transform: translateX(-50%) translateY(0) scale(1.03, .96) } }
+  .body { position: absolute; inset: 0 0 calc(5 * var(--u)) 0; background: linear-gradient(#ffe066, #fcc419 60%, #f08c00); border: 5px solid #222; border-radius: calc(5 * var(--u)) calc(9 * var(--u)) calc(3 * var(--u)) calc(3 * var(--u)); box-shadow: inset 0 calc(1.5 * var(--u)) 0 rgba(255,255,255,.4); }
+  .stripe { position: absolute; left: 0; right: 0; bottom: calc(10 * var(--u)); height: calc(3 * var(--u)); background: #e03131; border-top: 3px solid #222; border-bottom: 3px solid #222; }
+  .win { position: absolute; top: calc(5 * var(--u)); width: calc(12 * var(--u)); height: calc(12 * var(--u)); background: linear-gradient(#d0ebff, #a5d8ff); border: 4px solid #222; border-radius: calc(2 * var(--u)); overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+  .win .who { width: 85%; height: 95%; transform: translateY(10%); transition: transform .25s; }
+  .win.hop .who { animation: hop .5s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes hop { 0%,100% { transform: translateY(10%) } 50% { transform: translateY(-25%) } }
+  .win.in .who { animation: slideIn .4s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes slideIn { from { transform: translateY(110%) } to { transform: translateY(10%) } }
+  .windshield { position: absolute; right: calc(1.5 * var(--u)); top: calc(4 * var(--u)); width: calc(15 * var(--u)); height: calc(14 * var(--u)); background: linear-gradient(#d0ebff, #a5d8ff); border: 4px solid #222; border-radius: calc(2 * var(--u)) calc(6 * var(--u)) calc(2 * var(--u)) calc(2 * var(--u)); overflow: hidden; }
+  .windshield .who { position: absolute; left: 8%; bottom: -5%; width: 70%; height: 90%; }
+  .wiper { position: absolute; left: 25%; bottom: 0; width: 5px; height: 70%; background: #222; transform-origin: bottom center; transform: rotate(50deg); border-radius: 3px; }
+  .wiper.b { left: 62%; }
+  .windshield.swish .wiper { animation: wipe .8s ease-in-out; }
+  @keyframes wipe { 0%,100% { transform: rotate(50deg) } 50% { transform: rotate(-40deg) } }
+  .door { position: absolute; right: calc(20 * var(--u)); top: calc(5 * var(--u)); width: calc(8 * var(--u)); height: calc(27 * var(--u)); background: linear-gradient(#ffe066, #fcc419); border: 4px solid #222; border-radius: calc(1.5 * var(--u)); transform-origin: left center; transition: transform .35s; z-index: 2; overflow: hidden; }
+  .door::before { content: ''; position: absolute; left: 12%; right: 12%; top: 6%; height: 40%; background: linear-gradient(#d0ebff, #a5d8ff); border: 3px solid #222; border-radius: calc(1 * var(--u)); }
+  .door.open { transform: perspective(300px) rotateY(-80deg); }
+  .light { position: absolute; width: calc(3.5 * var(--u)); height: calc(3.5 * var(--u)); border-radius: 50%; border: 3px solid #222; }
+  .light.front { right: calc(-1 * var(--u)); bottom: calc(9 * var(--u)); background: #fff3bf; }
+  .light.back { left: calc(-1 * var(--u)); bottom: calc(9 * var(--u)); background: #ff6b6b; }
+  .bus.honking .light.front { box-shadow: 0 0 25px 10px #fff3bf; }
+  .bumper { position: absolute; right: calc(-2 * var(--u)); bottom: calc(2 * var(--u)); width: calc(6 * var(--u)); height: calc(5 * var(--u)); background: #ced4da; border: 4px solid #222; border-radius: calc(1.5 * var(--u)); z-index: 3; }
+  .wheel { position: absolute; bottom: 0; width: calc(13 * var(--u)); height: calc(13 * var(--u)); border-radius: 50%; background: #222; border: 4px solid #111; z-index: 3; animation: roll 1.2s linear infinite; }
+  .wheel.fast { animation-duration: .25s; }
+  .wheel::before { content: ''; position: absolute; inset: 22%; border-radius: 50%; background: #ced4da; border: 3px solid #868e96; }
+  .wheel::after { content: ''; position: absolute; inset: 22%; border-radius: 50%; background:
+      linear-gradient(#868e96, #868e96) 50% 0 / 12% 100% no-repeat, linear-gradient(#868e96, #868e96) 0 50% / 100% 12% no-repeat; }
+  .wheel.a { left: calc(9 * var(--u)); } .wheel.b { right: calc(13 * var(--u)); }
+  @keyframes roll { to { transform: rotate(360deg); } }
+  .sign { position: absolute; left: 50%; top: calc(-3 * var(--u)); transform: translateX(-50%); background: #fff; color: #222; padding: 0 calc(2 * var(--u)); border: 4px solid #222; border-radius: 100px; font-size: calc(3 * var(--u)); font-weight: 800; white-space: nowrap; }
+
+  .hint { position: absolute; top: 8vh; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 5;
+          --c:#fcc419; --c-light:#ffe066; --c-dark:#e67700; --rim:#fff; animation: fade 7s forwards; }
+  @keyframes fade { 0%,75% { opacity: 1 } 100% { opacity: 0 } }
+</style>
+</head>
+<body>
+  <div class="sun"></div>
+  <div class="cloud" style="top: 8vh; animation-duration: 40s;"></div>
+  <div class="cloud" style="top: 18vh; animation-duration: 55s; animation-delay: -20s; transform: scale(.7);"></div>
+  <div class="town"><div class="row" id="row"></div></div>
+  <div class="grass"></div>
+  <div class="road"></div>
+  <div class="candy hint">Tap the wheels, horn and door! 🚌</div>
+
+  <div class="bus" id="bus">
+    <div class="body"></div>
+    <div class="stripe"></div>
+    <div class="sign">AMNA BUS</div>
+    <div class="win" style="left: calc(4 * var(--u))"><div class="who"></div></div>
+    <div class="win" style="left: calc(19 * var(--u))"><div class="who"></div></div>
+    <div class="win" style="left: calc(34 * var(--u))"><div class="who"></div></div>
+    <div class="win" style="left: calc(49 * var(--u))"><div class="who"></div></div>
+    <div class="windshield" id="windshield"><div class="who" id="driver"></div><div class="wiper"></div><div class="wiper b"></div></div>
+    <div class="door" id="door"></div>
+    <div class="light front" id="horn"></div><div class="light back"></div>
+    <div class="bumper" id="bumper"></div>
+    <div class="wheel a"></div><div class="wheel b"></div>
+  </div>
+
+<script src="../shared/toddler.js"></script>
+<script src="../shared/characters.js"></script>
+<script>
+(function () {
+  const { S, guardKeys, onPress, addParentBar, rand, pick, burst } = Toddler;
+  addParentBar();
+  Chars.startBlinking();
+  const U = () => Toddler.u();
+  const bus = document.getElementById('bus');
+
+  // Build the looping town
+  const HC = ['#ff8787', '#ffd43b', '#63e6be', '#b197fc', '#ffa94d', '#74c0fc', '#f783ac', '#a9e34b'];
+  const RC = ['#e03131', '#5c7cfa', '#2f9e44', '#862e9c', '#d9480f'];
+  const row = document.getElementById('row');
+  let html = '';
+  for (let k = 0; k < 2; k++) for (let i = 0; i < 10; i++) {
+    const h = 9 + ((i * 7) % 11);
+    html += `<div class="house" style="background-color:${HC[i % HC.length]};--roof:${RC[i % RC.length]};height:calc(${h} * var(--u))"></div>`;
+  }
+  row.innerHTML = html;
+
+  const RIDERS = [
+    () => Chars.bean(pick(['#ff8787', '#69db7c', '#74c0fc', '#da77f2', '#ffa94d']), pick(['happy', 'silly', 'wow'])),
+    () => Chars.cat(pick(['#ffa94d', '#ced4da', '#f8f9fa', '#ff8787', '#b197fc'])),
+    () => Chars.monkey('#a0693b'),
+    () => Chars.cow(pick(['#333', '#8d5524'])),
+    () => Chars.dino(pick(['#51cf66', '#4dabf7', '#ff922b']), 'rex'),
+  ];
+  const wins = [...document.querySelectorAll('.win')];
+  wins.forEach(w => w.querySelector('.who').innerHTML = pick(RIDERS)());
+  document.getElementById('driver').innerHTML = Chars.bean('#ffd43b', 'happy');
+
+  function bump() { bus.classList.remove('bump'); void bus.offsetWidth; bus.classList.add('bump'); setTimeout(() => bus.classList.remove('bump'), 500); }
+  function center(el) { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+
+  // Wheels: round and round
+  document.querySelectorAll('.wheel').forEach(w => w.addEventListener('pointerdown', (e) => {
+    e.stopPropagation(); Toddler.audio();
+    document.querySelectorAll('.wheel').forEach(x => x.classList.add('fast'));
+    S.whirr(); burst(...center(w), ['🔄', '⭐', '💨'], 6, 14 * U());
+    setTimeout(() => document.querySelectorAll('.wheel').forEach(x => x.classList.remove('fast')), 1600);
+  }));
+
+  // Horn / bumper: beep beep beep
+  const honk = (e) => {
+    e.stopPropagation(); Toddler.audio();
+    bus.classList.add('honking'); S.honk(); setTimeout(() => S.beep(), 500);
+    burst(...center(document.getElementById('horn')), ['📣', '🎺', '💥'], 7, 16 * U()); bump();
+    setTimeout(() => bus.classList.remove('honking'), 700);
+  };
+  document.getElementById('horn').addEventListener('pointerdown', honk);
+  document.getElementById('bumper').addEventListener('pointerdown', honk);
+
+  // Wipers: swish swish swish
+  const ws = document.getElementById('windshield');
+  ws.addEventListener('pointerdown', (e) => {
+    e.stopPropagation(); Toddler.audio();
+    ws.classList.remove('swish'); void ws.offsetWidth; ws.classList.add('swish');
+    S.swish(); burst(...center(ws), ['💧', '💦', '✨'], 6, 12 * U());
+    setTimeout(() => ws.classList.remove('swish'), 800);
+  });
+
+  // Door: open and shut, a new rider climbs in
+  const door = document.getElementById('door');
+  let doorBusy = false;
+  door.addEventListener('pointerdown', (e) => {
+    e.stopPropagation(); Toddler.audio();
+    if (doorBusy) return; doorBusy = true;
+    door.classList.add('open'); S.bloop(); S.babble();
+    setTimeout(() => {
+      const w = pick(wins); const who = w.querySelector('.who');
+      who.innerHTML = pick(RIDERS)(); w.classList.add('in'); S.chime();
+      burst(...center(w), ['👋', '⭐', '💖'], 6, 12 * U());
+      setTimeout(() => w.classList.remove('in'), 450);
+    }, 500);
+    setTimeout(() => { door.classList.remove('open'); S.pop(); doorBusy = false; }, 1500);
+  });
+
+  // Riders: up and down
+  wins.forEach(w => w.addEventListener('pointerdown', (e) => {
+    e.stopPropagation(); Toddler.audio();
+    w.classList.remove('hop'); void w.offsetWidth; w.classList.add('hop');
+    pick([S.giggle, S.babble, S.meow, S.boing])();
+    burst(...center(w), ['🎵', '💖', '⭐'], 5, 12 * U());
+    setTimeout(() => w.classList.remove('hop'), 500);
+  }));
+
+  // Anywhere else: the bus goes bumpety bump
+  onPress(document.body, (x, y) => { Chars.lookAt(x, y); bump(); S.drum(); burst(x, y, ['🎶', '🚌', '⭐'], 4, 10 * U()); });
+  document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
+  guardKeys(() => {
+    Toddler.audio();
+    const targets = [...document.querySelectorAll('.wheel'), document.getElementById('horn'), ws, door, ...wins];
+    pick(targets).dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: innerWidth / 2, clientY: innerHeight / 2 }));
+  });
+})();
+</script>
+</body>
+</html>

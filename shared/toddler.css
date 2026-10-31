@@ -1,6 +1,11 @@
 /* Shared styles for Amna's games: candy colors, glossy buttons, cartoon characters */
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap');
 
+/* Scene unit: 1vmin on wide screens, capped against width so squarer screens
+   (iPad 4:3) and portrait get proportionally smaller characters and text. */
+:root { --u: min(1vmin, 0.62vw); }
+@media (orientation: portrait) { :root { --u: 0.8vw; } }
+
 * { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 html, body {
   margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
@@ -13,7 +18,7 @@ body { position: relative; }
 .wall {
   position: absolute; inset: 0; z-index: 0;
   background:
-    repeating-linear-gradient(90deg, var(--s1, #9be7c4) 0 7vmin, var(--s2, #6fd8e6) 7vmin 14vmin);
+    repeating-linear-gradient(90deg, var(--s1, #9be7c4) 0 calc(7 * var(--u)), var(--s2, #6fd8e6) calc(7 * var(--u)) calc(14 * var(--u)));
 }
 .wall::after { /* soft vignette so characters pop */
   content: ''; position: absolute; inset: 0;
@@ -28,9 +33,9 @@ body { position: relative; }
 /* ---- Glossy candy button ---- */
 .candy {
   position: relative; display: inline-flex; align-items: center; justify-content: center;
-  padding: 2.2vmin 5vmin; border-radius: 100px; border: 0; cursor: pointer;
-  color: #fff; font-family: inherit; font-weight: 800; font-size: 5.5vmin; letter-spacing: .5px;
-  text-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 8px rgba(0,0,0,.15);
+  padding: calc(2.2 * var(--u)) calc(5 * var(--u)); border-radius: 100px; border: 0; cursor: pointer;
+  color: #fff; font-family: inherit; font-weight: 800; font-size: calc(5.5 * var(--u)); letter-spacing: .5px;
+  text-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 8px rgba(0,0,0,.15); white-space: nowrap;
   background: linear-gradient(var(--c-light, #7ee55a), var(--c, #34c21f) 55%, var(--c-dark, #1f9a10));
   box-shadow:
     0 0 0 5px #fff8e8,            /* cream rim */
@@ -47,7 +52,7 @@ body { position: relative; }
 
 /* A glossy rounded card / panel */
 .panel {
-  border-radius: 4vmin; padding: 3vmin;
+  border-radius: calc(4 * var(--u)); padding: calc(3 * var(--u));
   background: linear-gradient(#6fc9ff, #2f9df0);
   box-shadow: 0 0 0 5px #fff8e8, 0 0 0 9px #cfeeff, 0 14px 30px rgba(0,0,0,.25), inset 0 3px 0 rgba(255,255,255,.4);
 }

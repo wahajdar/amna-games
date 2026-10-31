@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amna's Games">
+<meta name="theme-color" content="#339af0">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>Dino Stomp</title>
+<link rel="stylesheet" href="../shared/toddler.css">
+<style>
+  body { background: linear-gradient(#ffb347 0%, #ffd27f 35%, #ffe9b0 55%); }
+  .sun { position: absolute; top: 8vh; left: 12vw; width: calc(16 * var(--u)); height: calc(16 * var(--u)); border-radius: 50%;
+         background: radial-gradient(circle at 40% 35%, #fff2a8, #ff9f1c); box-shadow: 0 0 70px 24px rgba(255,160,40,.5); }
+  .mountain { position: absolute; bottom: 36vh; width: 0; height: 0; border-left: 22vw solid transparent; border-right: 22vw solid transparent; border-bottom: 22vh solid #c98b5a; opacity: .45; }
+  .volcano { position: absolute; right: 4vw; bottom: 36vh; width: 0; height: 0; border-left: 17vw solid transparent; border-right: 17vw solid transparent; border-bottom: 34vh solid #8d5a3c; z-index: 1; cursor: pointer; }
+  .volcano::after { content: ''; position: absolute; left: -7vw; top: 0; width: 14vw; height: 6vh; background: #e8590c; border-radius: 0 0 50% 50% / 0 0 100% 100%; box-shadow: inset 0 -6px 0 rgba(0,0,0,.2); }
+  .crater { position: absolute; right: 4vw; bottom: 69vh; width: 34vw; height: 3vh; z-index: 2; pointer-events: none; }
+  .smoke { position: absolute; left: 50%; bottom: 0; width: calc(8 * var(--u)); height: calc(8 * var(--u)); border-radius: 50%; background: rgba(120,120,120,.5); animation: smoke 3s linear infinite; }
+  @keyframes smoke { from { transform: translate(-50%, 0) scale(.5); opacity: .7 } to { transform: translate(-50%, -18vh) scale(2); opacity: 0 } }
+  .lava { position: absolute; font-size: calc(7 * var(--u)); pointer-events: none; animation: lava 1.2s ease-out forwards; z-index: 3; }
+  @keyframes lava { 0% { transform: translate(0,0) scale(.5); opacity: 1 } 100% { transform: translate(var(--dx), var(--dy)) scale(1.2); opacity: 0 } }
+
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 38vh; background: linear-gradient(#a9e34b, #74b816 55%, #5c940d); z-index: 1; }
+  .path { position: absolute; left: 0; right: 0; bottom: 0; height: 16vh; background: linear-gradient(#d9a066, #b07a3c); border-radius: 50% 50% 0 0 / 100% 100% 0 0; z-index: 1; }
+  .fern { position: absolute; bottom: 34vh; font-size: calc(9 * var(--u)); z-index: 1; animation: sway 3s ease-in-out infinite alternate; transform-origin: bottom center; }
+  @keyframes sway { from { transform: rotate(-6deg) } to { transform: rotate(6deg) } }
+
+  .dino { position: absolute; left: 0; bottom: 17vh; z-index: 2; will-change: transform; }
+  .dino .inner { width: 100%; height: 100%; transform-origin: 50% 100%; filter: drop-shadow(0 10px 8px rgba(0,0,0,.3)); }
+  .dino.roar .inner { animation: roar 1.1s ease-in-out; }
+  @keyframes roar { 0%,100% { transform: scale(1) } 20% { transform: scale(1.08, .94) } 40%,70% { transform: scale(.98, 1.08) rotate(-4deg) } }
+  .dino.stomp .inner { animation: stomp .6s ease-in-out; }
+  @keyframes stomp { 0%,100% { transform: translateY(0) } 35% { transform: translateY(-8vh) rotate(-5deg) } 55% { transform: translateY(0) scale(1.1, .9) } }
+
+  .nest { position: absolute; bottom: 2vh; left: 50%; transform: translateX(-50%); width: calc(56 * var(--u)); height: calc(13 * var(--u));
+          background: radial-gradient(ellipse at 50% 40%, #d9a066, #a86a2f); border-radius: 50%; z-index: 3; box-shadow: inset 0 6px 0 rgba(255,255,255,.2); }
+  .egg { position: absolute; bottom: 5vh; width: calc(14 * var(--u)); height: calc(17.5 * var(--u)); z-index: 4; }
+  .egg .char { filter: drop-shadow(0 6px 5px rgba(0,0,0,.3)); transform-origin: 50% 100%; }
+  .egg.wob .char { animation: wob .4s; }
+  @keyframes wob { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-12deg) } 75% { transform: rotate(12deg) } }
+  .egg.hatch .char.egg { animation: pop .3s forwards; }
+  @keyframes pop { to { transform: scale(1.4); opacity: 0 } }
+  .baby { position: absolute; bottom: 6vh; width: calc(18 * var(--u)); height: calc(13.5 * var(--u)); z-index: 5; pointer-events: none;
+          transform: translateY(40%) scale(.3); opacity: 0; transition: transform .45s cubic-bezier(.3,1.6,.5,1), opacity .2s; }
+  .baby.show { transform: translateY(0) scale(1); opacity: 1; }
+  .baby .char { filter: drop-shadow(0 6px 5px rgba(0,0,0,.3)); }
+
+  body.shake { animation: shake .5s; }
+  @keyframes shake { 0%,100% { transform: translate(0,0) } 20% { transform: translate(-8px, 4px) } 40% { transform: translate(8px, -4px) } 60% { transform: translate(-6px, 2px) } 80% { transform: translate(6px, -2px) } }
+
+  .hint { position: absolute; top: 14vh; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 5;
+          --c:#51cf66; --c-light:#8ce99a; --c-dark:#2f9e44; --rim:#fff; animation: fade 7s forwards; }
+  @keyframes fade { 0%,75% { opacity: 1 } 100% { opacity: 0 } }
+</style>
+</head>
+<body>
+  <div class="sun"></div>
+  <div class="mountain" style="left: 10vw"></div>
+  <div class="volcano" id="volcano"></div>
+  <div class="crater"><div class="smoke"></div><div class="smoke" style="animation-delay: -1.5s"></div></div>
+  <div class="ground"></div>
+  <div class="path"></div>
+  <div class="fern" style="left: 3vw">🌿</div><div class="fern" style="left: 22vw; animation-delay: -1s">🌴</div><div class="fern" style="right: 40vw; animation-delay: -2s">🌿</div>
+  <div class="nest"></div>
+  <div class="candy hint">Tap the dinos! 🦕</div>
+
+<script src="../shared/toddler.js"></script>
+<script src="../shared/characters.js"></script>
+<script>
+(function () {
+  const { S, guardKeys, onPress, addParentBar, rand, pick, burst } = Toddler;
+  addParentBar();
+  Chars.startBlinking();
+  const W = () => innerWidth, H = () => innerHeight, U = () => Toddler.u();
+
+  const dinos = [];
+  const SPECS = [
+    { kind: 'rex', color: '#51cf66', w: 36, h: 27, speed: .35, big: true },
+    { kind: 'neck', color: '#4dabf7', w: 38, h: 31, speed: .25, big: true },
+    { kind: 'tri', color: '#ff922b', w: 34, h: 25.5, speed: .3, big: false },
+  ];
+  SPECS.forEach((sp, i) => {
+    const el = document.createElement('div');
+    el.className = 'dino';
+    el.style.width = `calc(${sp.w} * var(--u))`; el.style.height = `calc(${sp.h} * var(--u))`;
+    el.innerHTML = `<div class="inner">${Chars.dino(sp.color, sp.kind)}</div>`;
+    document.body.appendChild(el);
+    const d = { el, sp, x: (i + .3) * W() / 3, y: [0, 6, 3][i], vx: sp.speed * (Math.random() < .5 ? -1 : 1), busy: false };
+    dinos.push(d);
+    el.addEventListener('pointerdown', (e) => { e.stopPropagation(); Toddler.audio(); tapDino(d, e.clientX, e.clientY); });
+  });
+
+  function dust(x, y, n = 5) { burst(x, y, ['💨', '🌫️'], n, 14 * U()); }
+
+  function tapDino(d, x, y) {
+    if (d.busy) return;
+    d.busy = true;
+    const r = d.el.getBoundingClientRect();
+    if (Math.random() < .5) {
+      d.el.classList.add('roar');
+      d.el.querySelector('.inner').innerHTML = Chars.dino(d.sp.color, d.sp.kind, 'roar');
+      S.roar(d.sp.big);
+      burst(r.left + r.width * .2, r.top + r.height * .3, ['💥', '⭐', '🔊'], 6, 16 * U());
+      setTimeout(() => { d.el.classList.remove('roar'); d.el.querySelector('.inner').innerHTML = Chars.dino(d.sp.color, d.sp.kind); d.busy = false; }, 1150);
+    } else {
+      d.el.classList.add('stomp');
+      setTimeout(() => { S.stomp(); document.body.classList.add('shake'); dust(r.left + r.width * .5, r.bottom, 8); setTimeout(() => document.body.classList.remove('shake'), 500); }, 330);
+      setTimeout(() => { d.el.classList.remove('stomp'); d.busy = false; }, 650);
+    }
+  }
+
+  // Eggs in the nest
+  const eggs = [];
+  const EGG = ['#51cf66', '#4dabf7', '#ff922b'];
+  EGG.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'egg';
+    el.style.left = `calc(50% + ${(i - 1) * 17}  * var(--u) - 7 * var(--u))`;
+    el.innerHTML = Chars.egg(c);
+    const baby = document.createElement('div');
+    baby.className = 'baby'; baby.style.left = el.style.left;
+    baby.innerHTML = Chars.dino(c, 'rex');
+    document.body.appendChild(el); document.body.appendChild(baby);
+    const e = { el, baby, taps: 0, busy: false };
+    eggs.push(e);
+    el.addEventListener('pointerdown', (ev) => { ev.stopPropagation(); Toddler.audio(); tapEgg(e); });
+  });
+
+  function tapEgg(e) {
+    if (e.busy) return;
+    e.taps++;
+    e.el.classList.remove('wob'); void e.el.offsetWidth; e.el.classList.add('wob');
+    S.crack();
+    const crack = e.el.querySelector('.crack');
+    if (e.taps === 1) { crack.setAttribute('opacity', '1'); return; }
+    // Hatch!
+    e.busy = true;
+    e.el.classList.add('hatch');
+    const r = e.el.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2, ['🥚', '✨', '⭐', '💛'], 10, 16 * U());
+    setTimeout(() => { e.baby.classList.add('show'); S.chirp(); setTimeout(() => S.chirp(), 500); }, 250);
+    setTimeout(() => {
+      e.baby.classList.remove('show'); e.el.classList.remove('hatch', 'wob');
+      crack.setAttribute('opacity', '0'); e.taps = 0; e.busy = false;
+    }, 3200);
+  }
+
+  // Volcano
+  document.getElementById('volcano').addEventListener('pointerdown', (ev) => {
+    ev.stopPropagation(); Toddler.audio();
+    S.rumble(); document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 500);
+    const cr = document.querySelector('.crater').getBoundingClientRect();
+    for (let i = 0; i < 12; i++) {
+      const l = document.createElement('div'); l.className = 'lava'; l.textContent = pick(['🔥', '🔥', '💥', '🪨']);
+      l.style.left = cr.left + cr.width / 2 + 'px'; l.style.top = cr.top + 'px';
+      l.style.setProperty('--dx', rand(-22, 22) * U() + 'px'); l.style.setProperty('--dy', rand(-30, -8) * U() + 'px');
+      document.body.appendChild(l); l.addEventListener('animationend', () => l.remove());
+    }
+    dinos.forEach((d, i) => setTimeout(() => { if (!d.busy) { d.busy = true; d.el.classList.add('stomp'); setTimeout(() => { d.el.classList.remove('stomp'); d.busy = false; }, 650); } }, i * 120));
+    setTimeout(() => S.stomp(), 600);
+  });
+
+  function frame() {
+    for (const d of dinos) {
+      if (!d.busy) d.x += d.vx;
+      const w = d.sp.w * U();
+      if (d.x < 0) { d.x = 0; d.vx = Math.abs(d.vx); }
+      if (d.x > W() - w) { d.x = W() - w; d.vx = -Math.abs(d.vx); }
+      const flip = d.vx > 0 ? -1 : 1;
+      d.el.style.transform = `translate(${d.x}px, ${-d.y * U()}px) scaleX(${flip})`;
+      if (Math.random() < 0.001) d.vx = -d.vx;
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+
+  onPress(document.body, (x, y) => { Chars.lookAt(x, y); dust(x, y, 3); S.pop(); });
+  document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
+  guardKeys(() => {
+    Toddler.audio();
+    const free = dinos.filter(d => !d.busy);
+    if (free.length) { const d = pick(free); const r = d.el.getBoundingClientRect(); tapDino(d, r.left + r.width / 2, r.top + r.height / 2); }
+  });
+})();
+</script>
+</body>
+</html>

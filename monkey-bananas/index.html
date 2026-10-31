@@ -17,13 +17,13 @@
   body { background: linear-gradient(#b2f2bb, #8ce99a 50%, #69db7c); }
   .ray { position: absolute; top: 0; width: 10vw; height: 100vh; background: linear-gradient(rgba(255,255,200,.35), transparent 70%); transform: skewX(-10deg); pointer-events: none; }
   .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 14vh; background: linear-gradient(#2f9e44, #2b8a3e); box-shadow: 0 -8px 0 rgba(255,255,255,.3); }
-  .trunk { position: absolute; left: 50%; top: -5vh; width: 7vmin; height: 40vh; transform: translateX(-50%); background: linear-gradient(90deg, #8b5a2b, #a0693b, #6d4420); border-radius: 0 0 3vmin 3vmin; z-index: 0; }
-  .leaf { position: absolute; top: 0; width: 34vmin; height: 12vmin; background: linear-gradient(#51cf66, #2f9e44); border-radius: 100% 100% 100% 0; transform-origin: left bottom; box-shadow: inset 0 -1vmin 0 rgba(0,0,0,.12); z-index: 0; animation: leafsway 4s ease-in-out infinite alternate; }
+  .trunk { position: absolute; left: 50%; top: -5vh; width: calc(7 * var(--u)); height: 40vh; transform: translateX(-50%); background: linear-gradient(90deg, #8b5a2b, #a0693b, #6d4420); border-radius: 0 0 calc(3 * var(--u)) calc(3 * var(--u)); z-index: 0; }
+  .leaf { position: absolute; top: 0; width: calc(34 * var(--u)); height: calc(12 * var(--u)); background: linear-gradient(#51cf66, #2f9e44); border-radius: 100% 100% 100% 0; transform-origin: left bottom; box-shadow: inset 0 calc(-1 * var(--u)) 0 rgba(0,0,0,.12); z-index: 0; animation: leafsway 4s ease-in-out infinite alternate; }
   .leaf.L { border-radius: 100% 100% 0 100%; transform-origin: right bottom; }
   @keyframes leafsway { from { rotate: -3deg } to { rotate: 3deg } }
-  .side { position: absolute; bottom: 10vh; font-size: 16vmin; pointer-events: none; z-index: 0; }
+  .side { position: absolute; bottom: 10vh; font-size: calc(16 * var(--u)); pointer-events: none; z-index: 0; }
 
-  .monkey { position: absolute; left: 50%; bottom: 10vh; width: 30vmin; height: 35.5vmin; transform: translateX(-50%); z-index: 3; }
+  .monkey { position: absolute; left: 50%; bottom: 10vh; width: calc(30 * var(--u)); height: calc(35.5 * var(--u)); transform: translateX(-50%); z-index: 3; }
   .monkey .inner { width: 100%; height: 100%; transform-origin: 50% 100%; filter: drop-shadow(0 10px 8px rgba(0,0,0,.3)); }
   .monkey.hop .inner { animation: hop .6s cubic-bezier(.3,1.5,.6,1); }
   @keyframes hop { 0%{transform:translateY(0)} 40%{transform:translateY(-12vh) rotate(-8deg)} 100%{transform:translateY(0)} }
@@ -32,12 +32,12 @@
   .monkey.dance .inner { animation: dance 1s ease-in-out; }
   @keyframes dance { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-14deg) translateY(-3vh)} 75%{transform:rotate(14deg) translateY(-3vh)} }
 
-  .banana { position: absolute; left: 0; top: 0; width: 13vmin; height: 13vmin; z-index: 2; will-change: transform; }
+  .banana { position: absolute; left: 0; top: 0; width: calc(15 * var(--u)); height: calc(15 * var(--u)); z-index: 2; will-change: transform; }
   .banana .char { filter: drop-shadow(0 6px 5px rgba(0,0,0,.3)); }
   .banana.eaten { transition: transform .45s cubic-bezier(.4,0,.8,1), opacity .2s .35s; opacity: 0; pointer-events: none; }
 
-  .tally { position: absolute; top: 2vmin; left: 50%; transform: translateX(-50%); display: flex; gap: .5vmin; flex-wrap: wrap; justify-content: center; max-width: 70vw; z-index: 4; pointer-events: none; }
-  .tally .char { width: 5vmin; height: 5vmin; }
+  .tally { position: absolute; top: calc(2 * var(--u)); left: 50%; transform: translateX(-50%); display: flex; gap: calc(.5 * var(--u)); flex-wrap: wrap; justify-content: center; max-width: 70vw; z-index: 4; pointer-events: none; }
+  .tally .char { width: calc(5 * var(--u)); height: calc(5 * var(--u)); }
 
   .hint { position: absolute; top: 32vh; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 4;
           --c:#fcc419; --c-light:#ffe066; --c-dark:#e67700; --rim:#fff; animation: fade 7s forwards; }
@@ -49,12 +49,12 @@
   <div class="trunk"></div>
   <div class="leaf" style="left: 50%; transform: rotate(10deg)"></div>
   <div class="leaf" style="left: 50%; top: 6vh; transform: rotate(35deg)"></div>
-  <div class="leaf" style="left: 50%; top: 10vh; transform: rotate(60deg); width: 26vmin"></div>
-  <div class="leaf L" style="left: calc(50% - 34vmin); transform: rotate(-10deg)"></div>
-  <div class="leaf L" style="left: calc(50% - 34vmin); top: 6vh; transform: rotate(-35deg)"></div>
-  <div class="leaf L" style="left: calc(50% - 26vmin); top: 10vh; transform: rotate(-60deg); width: 26vmin"></div>
+  <div class="leaf" style="left: 50%; top: 10vh; transform: rotate(60deg); width: calc(26 * var(--u))"></div>
+  <div class="leaf L" style="left: calc(50% - calc(34 * var(--u))); transform: rotate(-10deg)"></div>
+  <div class="leaf L" style="left: calc(50% - calc(34 * var(--u))); top: 6vh; transform: rotate(-35deg)"></div>
+  <div class="leaf L" style="left: calc(50% - calc(26 * var(--u))); top: 10vh; transform: rotate(-60deg); width: calc(26 * var(--u))"></div>
   <div class="side" style="left: 2vw">🌴</div><div class="side" style="right: 2vw">🌴</div>
-  <div class="side" style="left: 18vw; font-size: 9vmin">🌺</div><div class="side" style="right: 18vw; font-size: 9vmin">🌺</div>
+  <div class="side" style="left: 18vw; font-size: calc(9 * var(--u))">🌺</div><div class="side" style="right: 18vw; font-size: calc(9 * var(--u))">🌺</div>
   <div class="ground"></div>
   <div class="tally" id="tally"></div>
   <div class="monkey" id="monkey"><div class="inner"></div></div>
@@ -69,7 +69,7 @@
   Chars.startBlinking();
 
   const W = () => innerWidth, H = () => innerHeight;
-  const vmin = () => Math.min(W(), H()) / 100;
+  const U = () => Toddler.u();
   const monkey = document.getElementById('monkey');
   const inner = monkey.querySelector('.inner');
   const tally = document.getElementById('tally');
@@ -84,7 +84,7 @@
     el.className = 'banana';
     el.innerHTML = Chars.banana();
     document.body.appendChild(el);
-    const b = { el, x: rand(5 * vmin(), W() - 18 * vmin()), y: -14 * vmin(), vy: rand(.8, 1.6) * vmin() / 8, wob: rand(0, 6.28), rot: rand(-40, 40), landed: false, done: false };
+    const b = { el, x: rand(5 * U(), W() - 18 * U()), y: -14 * U(), vy: rand(.8, 1.6) * U() / 8, wob: rand(0, 6.28), rot: rand(-40, 40), landed: false, done: false };
     bananas.push(b);
     el.addEventListener('pointerdown', (e) => { e.stopPropagation(); Toddler.audio(); eat(b); });
   }
@@ -93,12 +93,12 @@
     if (b.done) return;
     b.done = true;
     const m = monkey.getBoundingClientRect();
-    const tx = m.left + m.width / 2 - 6.5 * vmin(), ty = m.top + m.height * .55 - 6.5 * vmin();
+    const tx = m.left + m.width / 2 - 7.5 * U(), ty = m.top + m.height * .55 - 7.5 * U();
     b.el.classList.add('eaten');
     b.el.style.transform = `translate(${tx}px, ${ty}px) rotate(${b.rot + 360}deg) scale(.5)`;
     setTimeout(() => {
       setMood('eat'); monkey.classList.add('chew'); S.nom();
-      burst(tx + 6 * vmin(), ty, ['🍌', '💛', '✨'], 6, 120);
+      burst(tx + 6 * U(), ty, ['🍌', '💛', '✨'], 6, 120);
       eaten++;
       const t = document.createElement('div'); t.innerHTML = Chars.banana(); tally.appendChild(t);
       if (tally.children.length > 20) tally.firstChild.remove();
@@ -125,12 +125,12 @@
 
   function frame() {
     const t = performance.now() / 1000;
-    const floor = H() * .86 - 13 * vmin();
+    const floor = H() * .86 - 15 * U();
     for (const b of bananas) {
       if (b.done) continue;
       if (!b.landed) { b.y += b.vy; if (b.y >= floor) { b.y = floor; b.landed = true; S.pop(); } }
-      const sway = b.landed ? 0 : Math.sin(t * 3 + b.wob) * 3 * vmin();
-      const bob = b.landed ? Math.abs(Math.sin(t * 3 + b.wob)) * 1.5 * vmin() : 0;
+      const sway = b.landed ? 0 : Math.sin(t * 3 + b.wob) * 3 * U();
+      const bob = b.landed ? Math.abs(Math.sin(t * 3 + b.wob)) * 1.5 * U() : 0;
       b.el.style.transform = `translate(${b.x + sway}px, ${b.y - bob}px) rotate(${b.rot + (b.landed ? 0 : Math.sin(t * 2 + b.wob) * 15)}deg)`;
     }
     requestAnimationFrame(frame);

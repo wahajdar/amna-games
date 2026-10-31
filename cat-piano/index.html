@@ -16,25 +16,26 @@
 <style>
   .wall { --s1: #b197fc; --s2: #d0bfff; }
   .grid {
-    position: absolute; inset: 0; z-index: 1; display: grid; gap: 2vmin; padding: 2vmin;
-    grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr);
+    position: absolute; inset: 0; z-index: 1; display: grid; gap: calc(2 * var(--u)); padding: calc(2 * var(--u));
+    grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr));
   }
-  @media (orientation: portrait) { .grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); } }
+  @media (orientation: portrait) { .grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, minmax(0, 1fr)); } }
   .key {
-    position: relative; border-radius: 4vmin; display: flex; align-items: flex-end; justify-content: center;
+    position: relative; border-radius: calc(4 * var(--u)); display: flex; align-items: flex-end; justify-content: center;
     background: linear-gradient(var(--light), var(--c) 60%, var(--dark));
-    box-shadow: 0 0 0 4px #fff8e8, 0 8px 0 4px rgba(0,0,0,.2), inset 0 -1.5vmin 0 rgba(0,0,0,.15), inset 0 3px 0 rgba(255,255,255,.5);
+    box-shadow: 0 0 0 4px #fff8e8, 0 8px 0 4px rgba(0,0,0,.2), inset 0 calc(-1.5 * var(--u)) 0 rgba(0,0,0,.15), inset 0 3px 0 rgba(255,255,255,.5);
     transition: transform .08s, box-shadow .08s; overflow: visible;
   }
-  .key::before { content: ''; position: absolute; left: 6%; right: 6%; top: 5%; height: 30%; border-radius: 3vmin;
+  .key::before { content: ''; position: absolute; left: 6%; right: 6%; top: 5%; height: 30%; border-radius: calc(3 * var(--u));
                  background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,0)); pointer-events: none; }
-  .key .who { width: 78%; aspect-ratio: 1; margin-bottom: 3%; pointer-events: none; filter: drop-shadow(0 8px 6px rgba(0,0,0,.3)); }
-  .key.hit { transform: translateY(5px); box-shadow: 0 0 0 4px #fff8e8, 0 3px 0 4px rgba(0,0,0,.2), 0 0 50px 14px rgba(255,255,255,.6), inset 0 -0.5vmin 0 rgba(0,0,0,.15); }
+  .key { min-height: 0; min-width: 0; }
+  .key .who { height: 72%; max-width: 85%; aspect-ratio: 1; margin-bottom: 3%; pointer-events: none; filter: drop-shadow(0 8px 6px rgba(0,0,0,.3)); }
+  .key.hit { transform: translateY(5px); box-shadow: 0 0 0 4px #fff8e8, 0 3px 0 4px rgba(0,0,0,.2), 0 0 50px 14px rgba(255,255,255,.6), inset 0 calc(-0.5 * var(--u)) 0 rgba(0,0,0,.15); }
   .key.hit .who { animation: bounce .45s cubic-bezier(.3,1.6,.6,1); }
   @keyframes bounce {
     0% { transform: scale(1); } 30% { transform: scale(1.25) rotate(-8deg); } 60% { transform: scale(.95) rotate(6deg); } 100% { transform: scale(1); }
   }
-  .label { position: absolute; top: 2vmin; left: 3vmin; color: rgba(255,255,255,.9); font-size: 6vmin; font-weight: 800;
+  .label { position: absolute; top: calc(2 * var(--u)); left: calc(3 * var(--u)); color: rgba(255,255,255,.9); font-size: calc(6 * var(--u)); font-weight: 800;
            text-shadow: 0 2px 0 rgba(0,0,0,.25); }
 </style>
 </head>

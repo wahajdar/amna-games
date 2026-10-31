@@ -15,14 +15,14 @@
 <link rel="stylesheet" href="../shared/toddler.css">
 <style>
   body { background: linear-gradient(#9ff0ff 0%, #9ff0ff 20%, #35c4f5 20.5%, #1a9be8 55%, #0f66b8 100%); }
-  .sun { position: absolute; top: 4vh; left: 7vw; width: 15vmin; height: 15vmin; border-radius: 50%;
+  .sun { position: absolute; top: 4vh; left: 7vw; width: calc(15 * var(--u)); height: calc(15 * var(--u)); border-radius: 50%;
          background: radial-gradient(circle at 40% 35%, #fff6b0, #ffd43b); box-shadow: 0 0 70px 24px rgba(255,220,80,.55); }
   .sun::after { content: ''; position: absolute; inset: -14%; border-radius: 50%; border: 5px dashed rgba(255,255,255,.6); animation: spinSlow 30s linear infinite; }
   @keyframes spinSlow { to { transform: rotate(360deg); } }
-  .cloud { position: absolute; top: 5vh; width: 18vmin; height: 7vmin; background: #fff; border-radius: 100px; opacity: .95; animation: drift linear infinite; }
+  .cloud { position: absolute; top: 5vh; width: calc(18 * var(--u)); height: calc(7 * var(--u)); background: #fff; border-radius: 100px; opacity: .95; animation: drift linear infinite; }
   .cloud::before, .cloud::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
-  .cloud::before { width: 9vmin; height: 9vmin; left: 3vmin; top: -5vmin; }
-  .cloud::after { width: 7vmin; height: 7vmin; left: 9vmin; top: -3.5vmin; }
+  .cloud::before { width: calc(9 * var(--u)); height: calc(9 * var(--u)); left: calc(3 * var(--u)); top: calc(-5 * var(--u)); }
+  .cloud::after { width: calc(7 * var(--u)); height: calc(7 * var(--u)); left: calc(9 * var(--u)); top: calc(-3.5 * var(--u)); }
   @keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(120vw); } }
 
   .wave { position: absolute; left: -10%; width: 120%; height: 6vh; top: 17.5%;
@@ -33,7 +33,7 @@
 
   .seafloor { position: absolute; bottom: 0; left: 0; right: 0; height: 10vh;
               background: linear-gradient(#f2d59a, #d8a95f); border-radius: 50% 50% 0 0 / 40px 40px 0 0; box-shadow: 0 -6px 0 rgba(255,255,255,.35); }
-  .plant { position: absolute; bottom: 7vh; font-size: 10vmin; transform-origin: bottom center; animation: sway 3s ease-in-out infinite alternate; }
+  .plant { position: absolute; bottom: 7vh; font-size: calc(10 * var(--u)); transform-origin: bottom center; animation: sway 3s ease-in-out infinite alternate; }
   @keyframes sway { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
 
   .swimmer { position: absolute; left: 0; top: 0; will-change: transform; }
@@ -78,7 +78,7 @@
   Chars.startBlinking();
 
   const W = () => innerWidth, H = () => innerHeight;
-  const vmin = Math.min(W(), H()) / 100;
+  const U = () => Toddler.u();
   const swimmers = [];
   const FISH_COLORS = ['#ffd43b', '#ff8787', '#63e6be', '#da77f2', '#ffa94d', '#74c0fc'];
 
@@ -95,10 +95,10 @@
   }
 
   // Shark family: big blue, medium pink, small yellow. Fish in between.
-  makeSwimmer('shark', 42 * vmin, H() * .26, 1.5, '#4dabf7');
-  makeSwimmer('shark', 30 * vmin, H() * .47, 2.1, '#f783ac');
-  makeSwimmer('shark', 20 * vmin, H() * .64, 2.9, '#ffd43b');
-  for (let i = 0; i < 6; i++) makeSwimmer('fish', rand(11, 15) * vmin, rand(H() * .25, H() * .82), rand(1, 2.4), pick(FISH_COLORS));
+  makeSwimmer('shark', 42 * U(), H() * .26, 1.5, '#4dabf7');
+  makeSwimmer('shark', 30 * U(), H() * .47, 2.1, '#f783ac');
+  makeSwimmer('shark', 20 * U(), H() * .64, 2.9, '#ffd43b');
+  for (let i = 0; i < 6; i++) makeSwimmer('fish', rand(11, 15) * U(), rand(H() * .25, H() * .82), rand(1, 2.4), pick(FISH_COLORS));
 
   function frame() {
     const t = performance.now() / 1000;
@@ -166,7 +166,7 @@
 
   function press(x, y) {
     Chars.lookAt(x, y);
-    const fish = nearest('fish', x, y, 12 * vmin);
+    const fish = nearest('fish', x, y, 12 * U());
     if (fish) { popFish(fish, x, y); return; }
     bubbles(x, y, 10);
     const shark = nearest('shark', x, y, Infinity);

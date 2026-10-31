@@ -16,16 +16,16 @@
 <style>
   .wall { --s1: #ffe066; --s2: #fff3bf; }
   .floor { height: 26%; background: linear-gradient(#845ef7, #5f3dc4); }
-  .bunting { position: absolute; top: 0; left: 0; right: 0; height: 9vmin; z-index: 1; pointer-events: none;
+  .bunting { position: absolute; top: 0; left: 0; right: 0; height: calc(9 * var(--u)); z-index: 1; pointer-events: none;
     background:
-      linear-gradient(135deg, transparent 50%, #ff6b6b 50%) 0 0 / 6vmin 100% repeat-x,
-      linear-gradient(225deg, transparent 50%, #ff6b6b 50%) 0 0 / 6vmin 100% repeat-x; }
+      linear-gradient(135deg, transparent 50%, #ff6b6b 50%) 0 0 / calc(6 * var(--u)) 100% repeat-x,
+      linear-gradient(225deg, transparent 50%, #ff6b6b 50%) 0 0 / calc(6 * var(--u)) 100% repeat-x; }
   .bunting::after { content: ''; position: absolute; inset: 0;
-      background: repeating-linear-gradient(90deg, transparent 0 6vmin, rgba(255,255,255,.35) 6vmin 12vmin); mix-blend-mode: screen; }
+      background: repeating-linear-gradient(90deg, transparent 0 calc(6 * var(--u)), rgba(255,255,255,.35) calc(6 * var(--u)) calc(12 * var(--u))); mix-blend-mode: screen; }
 
-  .bean { position: absolute; left: 0; bottom: 20%; width: 24vmin; height: 27.6vmin; z-index: 2; will-change: transform; }
+  .bean { position: absolute; left: 0; bottom: 20%; width: calc(24 * var(--u)); height: calc(27.6 * var(--u)); z-index: 2; will-change: transform; }
   .bean .inner { width: 100%; height: 100%; transform-origin: 50% 100%; filter: drop-shadow(0 10px 8px rgba(0,0,0,.3)); }
-  .bean .shadow { position: absolute; left: 15%; right: 15%; bottom: -2vmin; height: 3vmin; border-radius: 50%; background: rgba(0,0,0,.25); z-index: -1; }
+  .bean .shadow { position: absolute; left: 15%; right: 15%; bottom: calc(-2 * var(--u)); height: calc(3 * var(--u)); border-radius: 50%; background: rgba(0,0,0,.25); z-index: -1; }
 
   .bean.jump .inner  { animation: jump .7s cubic-bezier(.3,1.5,.6,1); }
   .bean.spin .inner  { animation: spin1 .8s ease-in-out; }
@@ -38,14 +38,14 @@
   @keyframes spin1 { to { transform: rotate(360deg); } }
   @keyframes wob   { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-18deg)} 40%{transform:rotate(16deg)} 60%{transform:rotate(-12deg)} 80%{transform:rotate(8deg)} }
   @keyframes honk  { 0%,100%{transform:scale(1)} 40%{transform:scale(1.35,1.2)} 60%{transform:scale(1.3,1.25)} }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 10%,30%,50%,70%,90%{transform:translateX(-3vmin) rotate(-4deg)} 20%,40%,60%,80%{transform:translateX(3vmin) rotate(4deg)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 10%,30%,50%,70%,90%{transform:translateX(calc(-3 * var(--u))) rotate(-4deg)} 20%,40%,60%,80%{transform:translateX(calc(3 * var(--u))) rotate(4deg)} }
   @keyframes squash{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.5,.5)} }
-  @keyframes sneeze{ 0%{transform:scale(1)} 35%{transform:scale(1.1,1.2) translateY(-2vmin)} 45%{transform:scale(1.1,1.2) translateY(-3vmin)} 55%{transform:scale(1.2,.8) translateY(0) rotate(12deg)} 100%{transform:scale(1)} }
+  @keyframes sneeze{ 0%{transform:scale(1)} 35%{transform:scale(1.1,1.2) translateY(calc(-2 * var(--u)))} 45%{transform:scale(1.1,1.2) translateY(calc(-3 * var(--u)))} 55%{transform:scale(1.2,.8) translateY(0) rotate(12deg)} 100%{transform:scale(1)} }
 
-  .puff { position: absolute; font-size: 8vmin; z-index: 1; pointer-events: none; animation: puff .8s ease-out forwards; }
-  @keyframes puff { from { opacity: 1; transform: scale(.4) } to { opacity: 0; transform: scale(1.8) translateX(-6vmin) } }
+  .puff { position: absolute; font-size: calc(8 * var(--u)); z-index: 1; pointer-events: none; animation: puff .8s ease-out forwards; }
+  @keyframes puff { from { opacity: 1; transform: scale(.4) } to { opacity: 0; transform: scale(1.8) translateX(calc(-6 * var(--u))) } }
 
-  .hint { position: absolute; top: 12vmin; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 3;
+  .hint { position: absolute; top: calc(12 * var(--u)); left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 3;
           --c:#20c997; --c-light:#63e6be; --c-dark:#0ca678; --rim:#fff; animation: fade 7s forwards; }
   @keyframes fade { 0%,75% { opacity: 1 } 100% { opacity: 0 } }
 </style>
@@ -65,7 +65,7 @@
   Chars.startBlinking();
 
   const W = () => innerWidth, H = () => innerHeight;
-  const vmin = () => Math.min(W(), H()) / 100;
+  const U = () => Toddler.u();
   const COLORS = ['#ff8787', '#69db7c', '#74c0fc', '#da77f2', '#ffa94d'];
   const beans = [];
 
@@ -74,7 +74,7 @@
     el.className = 'bean';
     el.innerHTML = `<div class="inner">${Chars.bean(c)}</div><div class="shadow"></div>`;
     document.body.appendChild(el);
-    const b = { el, color: c, x: (i + .5) * W() / COLORS.length - 12 * vmin(), vx: rand(.3, .8) * (Math.random() < .5 ? -1 : 1), busy: false, wob: rand(0, 6.28) };
+    const b = { el, color: c, x: (i + .5) * W() / COLORS.length - 12 * U(), vx: rand(.3, .8) * (Math.random() < .5 ? -1 : 1), busy: false, wob: rand(0, 6.28) };
     beans.push(b);
     el.addEventListener('pointerdown', (e) => { e.stopPropagation(); Toddler.audio(); trick(b, pick(TRICKS), e.clientX, e.clientY); });
   });
@@ -119,10 +119,10 @@
     const t = performance.now() / 1000;
     for (const b of beans) {
       if (!b.busy) b.x += b.vx;
-      const w = 24 * vmin();
+      const w = 24 * U();
       if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx); }
       if (b.x > W() - w) { b.x = W() - w; b.vx = -Math.abs(b.vx); }
-      const bob = Math.abs(Math.sin(t * 4 + b.wob)) * 1.2 * vmin();
+      const bob = Math.abs(Math.sin(t * 4 + b.wob)) * 1.2 * U();
       const flip = b.vx > 0 ? 1 : -1;
       b.el.style.transform = `translate(${b.x}px, ${-bob}px) scaleX(${flip})`;
       if (Math.random() < 0.0015) b.vx = -b.vx;

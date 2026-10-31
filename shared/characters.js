@@ -257,6 +257,92 @@
 </svg>`;
   }
 
+  // Dinosaurs (original cartoon designs), side view facing left. kind: rex | neck | tri
+  function dino(color = '#51cf66', kind = 'rex', mood = 'happy') {
+    const dark = shade(color, -25), light = shade(color, 35), belly = shade(color, 60);
+    const g = id('dg');
+    const defs = `<defs><radialGradient id="${g}" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="${light}"/><stop offset="1" stop-color="${color}"/></radialGradient></defs>`;
+    const mouthRex = mood === 'roar'
+      ? `<path class="mouth" d="M22 112 Q60 150 100 118 Q70 160 22 112 Z" fill="#5a1f3a" stroke="#222" stroke-width="4" stroke-linejoin="round"/>
+         <path d="M34 118 l6 12 l6 -12 l6 12 l6 -12 l6 12 l6 -12" fill="#fff" stroke="#222" stroke-width="2"/>`
+      : `<path class="mouth" d="M26 112 Q60 132 98 116" fill="none" stroke="#222" stroke-width="5" stroke-linecap="round"/>
+         <path d="M40 116 l5 9 l5 -9 M60 120 l5 9 l5 -9" fill="#fff" stroke="#222" stroke-width="2.5" stroke-linejoin="round"/>`;
+    if (kind === 'rex') return `
+<svg class="char dino rex" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">${defs}
+  <g class="body">
+    <path class="tail" d="M230 150 Q300 130 315 95 Q295 150 240 175 Z" fill="${color}" stroke="#222" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M110 40 l14 -22 l10 24 M135 32 l12 -20 l10 24 M160 30 l12 -18 l8 24" fill="${dark}" stroke="#222" stroke-width="4" stroke-linejoin="round"/>
+    <rect class="leg" x="130" y="170" width="34" height="56" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <rect class="leg" x="195" y="170" width="34" height="56" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <path d="M122 222 h50 M187 222 h50" stroke="#222" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="175" cy="140" rx="80" ry="55" fill="url(#${g})" stroke="#222" stroke-width="5"/>
+    <ellipse cx="165" cy="160" rx="50" ry="28" fill="${belly}" opacity=".9"/>
+    <path d="M110 150 Q90 165 108 178" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round"/>
+    <path d="M110 150 Q90 165 108 178" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round" opacity="0"/>
+    <circle cx="108" cy="179" r="7" fill="${light}" stroke="#222" stroke-width="3"/>
+    <path d="M20 90 C20 50 60 35 95 45 C135 55 150 90 140 125 C130 150 60 150 20 118 Z" fill="url(#${g})" stroke="#222" stroke-width="5"/>
+    <circle cx="48" cy="100" r="9" fill="#ff8fa3" opacity=".6"/>
+    <ellipse cx="34" cy="86" rx="5" ry="4" fill="${dark}"/>
+    ${eye(80, 80, 16)}
+    ${mouthRex}
+  </g>
+</svg>`;
+    if (kind === 'neck') return `
+<svg class="char dino neck" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">${defs}
+  <g class="body">
+    <path class="tail" d="M240 170 Q310 160 318 120 Q300 180 245 195 Z" fill="${color}" stroke="#222" stroke-width="5" stroke-linejoin="round"/>
+    <rect class="leg" x="120" y="190" width="30" height="55" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <rect class="leg" x="160" y="195" width="30" height="55" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <rect class="leg" x="205" y="195" width="30" height="55" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <rect class="leg" x="240" y="190" width="30" height="55" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <path d="M95 60 C60 100 70 160 110 190 L150 170 C120 140 120 100 130 70 Z" fill="url(#${g})" stroke="#222" stroke-width="5" stroke-linejoin="round"/>
+    <ellipse cx="190" cy="170" rx="85" ry="48" fill="url(#${g})" stroke="#222" stroke-width="5"/>
+    <ellipse cx="190" cy="188" rx="55" ry="24" fill="${belly}" opacity=".9"/>
+    <path d="M150 128 l0 -8 M175 124 l0 -8 M200 124 l0 -8 M225 128 l0 -8" stroke="${dark}" stroke-width="7" stroke-linecap="round"/>
+    <ellipse cx="90" cy="55" rx="48" ry="34" fill="url(#${g})" stroke="#222" stroke-width="5"/>
+    <circle cx="60" cy="68" r="8" fill="#ff8fa3" opacity=".6"/>
+    <ellipse cx="50" cy="52" rx="4" ry="3" fill="${dark}"/>
+    ${eye(92, 48, 13)}
+    <path class="mouth" d="M48 72 Q70 86 98 76" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>`;
+    return `
+<svg class="char dino tri" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">${defs}
+  <g class="body">
+    <path class="tail" d="M250 150 Q310 140 316 110 Q300 165 255 180 Z" fill="${color}" stroke="#222" stroke-width="5" stroke-linejoin="round"/>
+    <rect class="leg" x="140" y="175" width="32" height="52" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <rect class="leg" x="180" y="180" width="32" height="52" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <rect class="leg" x="215" y="175" width="32" height="52" rx="12" fill="${color}" stroke="#222" stroke-width="5"/>
+    <ellipse cx="190" cy="150" rx="88" ry="52" fill="url(#${g})" stroke="#222" stroke-width="5"/>
+    <ellipse cx="190" cy="170" rx="55" ry="25" fill="${belly}" opacity=".9"/>
+    <path d="M150 100 q10 -10 20 0 M180 95 q10 -10 20 0 M210 100 q10 -10 20 0" fill="none" stroke="${dark}" stroke-width="6" stroke-linecap="round"/>
+    <!-- frill -->
+    <path d="M90 50 C70 40 150 20 160 70 C175 110 140 150 110 140 C80 130 60 90 90 50 Z" fill="${dark}" stroke="#222" stroke-width="5"/>
+    <path d="M122 60 l0 -22 M142 66 l10 -18 M110 70 l-12 -18" stroke="#222" stroke-width="10" stroke-linecap="round"/>
+    <path d="M122 60 l0 -22 M142 66 l10 -18 M110 70 l-12 -18" stroke="#fff3bf" stroke-width="5" stroke-linecap="round"/>
+    <!-- head -->
+    <path d="M20 95 C25 60 70 50 105 62 C140 75 145 115 130 135 C110 150 60 150 20 125 Z" fill="url(#${g})" stroke="#222" stroke-width="5"/>
+    <path d="M30 82 L10 62 L46 72 Z" fill="#fff3bf" stroke="#222" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M70 62 L68 30 L88 60 Z" fill="#fff3bf" stroke="#222" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M100 66 L108 36 L118 70 Z" fill="#fff3bf" stroke="#222" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="48" cy="112" r="8" fill="#ff8fa3" opacity=".6"/>
+    ${eye(82, 92, 14)}
+    <path class="mouth" d="M24 118 Q50 136 85 124" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>`;
+  }
+
+  function egg(spots = '#51cf66') {
+    const g = id('eg');
+    return `
+<svg class="char egg" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="${g}" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f1e9d2"/></radialGradient></defs>
+  <path class="shell" d="M60 8 C95 8 112 60 112 95 C112 130 90 145 60 145 C30 145 8 130 8 95 C8 60 25 8 60 8 Z" fill="url(#${g})" stroke="#222" stroke-width="5"/>
+  <circle cx="40" cy="60" r="9" fill="${spots}" opacity=".8"/><circle cx="78" cy="85" r="12" fill="${spots}" opacity=".8"/><circle cx="48" cy="112" r="8" fill="${spots}" opacity=".8"/><circle cx="82" cy="45" r="6" fill="${spots}" opacity=".8"/>
+  <path class="crack" d="M35 80 l10 -12 l8 14 l10 -16 l9 13 l8 -10" fill="none" stroke="#222" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+</svg>`;
+  }
+
   // Simple hex shade helper
   function shade(hex, pct) {
     const n = parseInt(hex.slice(1), 16);
@@ -287,5 +373,5 @@
     }, 1400);
   }
 
-  window.Chars = { cat, shark, fish, bean, cow, monkey, banana, shade, lookAt, startBlinking };
+  window.Chars = { cat, shark, fish, bean, cow, monkey, banana, dino, egg, shade, lookAt, startBlinking };
 })();

@@ -150,6 +150,49 @@
       tone({ type: 'sawtooth', from: 400, to: 700, dur: 0.25, vol: 0.12, filter: 1500 });
       setTimeout(() => { S.splash(); tone({ type: 'sawtooth', from: 500, to: 150, dur: 0.3, vol: 0.2, filter: 1200 }); }, 280);
     },
+    roar(big = true) {
+      const c = audio(); if (!c) return;
+      const t0 = c.currentTime, base = big ? 70 : 140;
+      const osc = c.createOscillator(), g = c.createGain(), f = c.createBiquadFilter();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(base, t0);
+      osc.frequency.exponentialRampToValueAtTime(base * 2.2, t0 + 0.25);
+      osc.frequency.exponentialRampToValueAtTime(base * 0.9, t0 + 1.0);
+      f.type = 'lowpass'; f.frequency.setValueAtTime(600, t0); f.frequency.exponentialRampToValueAtTime(1800, t0 + 0.3); f.frequency.exponentialRampToValueAtTime(300, t0 + 1.0); f.Q.value = 5;
+      const lfo = c.createOscillator(), lg = c.createGain();
+      lfo.frequency.value = 22; lg.gain.value = base * 0.35; lfo.connect(lg).connect(osc.frequency);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.45, t0 + 0.1);
+      g.gain.setValueAtTime(0.45, t0 + 0.6); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.1);
+      osc.connect(f).connect(g).connect(c.destination); osc.start(t0); lfo.start(t0); osc.stop(t0 + 1.15); lfo.stop(t0 + 1.15);
+      // low thump underneath
+      tone({ type: 'sine', from: 90, to: 35, dur: 0.5, vol: 0.5 });
+    },
+    stomp() { tone({ type: 'sine', from: 120, to: 30, dur: 0.3, vol: 0.7 }); S.splash(); },
+    chirp() { for (let i = 0; i < 3; i++) tone({ type: 'sine', from: 1200, to: 1900, dur: 0.08, vol: 0.2, delay: i * 0.12 }); },
+    crack() { for (let i = 0; i < 3; i++) tone({ type: 'square', from: 2500 - i * 500, to: 800, dur: 0.04, vol: 0.12, delay: i * 0.09 }); },
+    rumble() {
+      const c = audio(); if (!c) return;
+      const len = 1.4, buf = c.createBuffer(1, c.sampleRate * len, c.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / d.length);
+      const src = c.createBufferSource(); src.buffer = buf;
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 140;
+      const g = c.createGain(); g.gain.value = 1.2;
+      src.connect(f).connect(g).connect(c.destination); src.start();
+    },
+    whirr() { for (let i = 0; i < 8; i++) tone({ type: 'triangle', from: 300 + i * 60, to: 340 + i * 60, dur: 0.1, vol: 0.14, delay: i * 0.1 }); },
+    swish() {
+      const c = audio(); if (!c) return;
+      for (let k = 0; k < 2; k++) {
+        const t0 = c.currentTime + k * 0.4, len = 0.35, buf = c.createBuffer(1, c.sampleRate * len, c.sampleRate), d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * i / d.length);
+        const src = c.createBufferSource(); src.buffer = buf;
+        const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.2;
+        f.frequency.setValueAtTime(k ? 3000 : 1200, t0); f.frequency.exponentialRampToValueAtTime(k ? 1200 : 3000, t0 + len);
+        const g = c.createGain(); g.gain.value = 0.3;
+        src.connect(f).connect(g).connect(c.destination); src.start(t0);
+      }
+    },
+    beep() { tone({ type: 'square', from: 880, dur: 0.12, vol: 0.12, filter: 2000 }); tone({ type: 'square', from: 880, dur: 0.12, vol: 0.12, filter: 2000, delay: 0.18 }); },
   };
 
   // ---------- Key-mash safety ----------
@@ -202,6 +245,8 @@
   }
 
   // ---------- Helpers ----------
+  // Scene unit in px: matches the CSS --u (1vmin capped at 0.62vw).
+  const u = () => innerHeight > innerWidth ? innerWidth * 0.008 : Math.min(Math.min(innerWidth, innerHeight) / 100, innerWidth * 0.0062);
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -222,5 +267,5 @@
     }
   }
 
-  window.Toddler = { audio, S, guardKeys, onPress, addParentBar, rand, pick, burst };
+  window.Toddler = { audio, S, guardKeys, onPress, addParentBar, rand, pick, burst, u };
 })();

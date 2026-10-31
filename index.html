@@ -16,28 +16,29 @@
 <style>
   .wall { --s1: #9be7c4; --s2: #6fd8e6; }
   .page { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; }
-  h1 { margin: 3vmin auto 0; padding: 1.5vmin 6vmin; border-radius: 100px; color: #fff; font-size: 8vmin;
+  h1 { margin: calc(3 * var(--u)) auto 0; padding: calc(1.5 * var(--u)) calc(6 * var(--u)); border-radius: 100px; color: #fff; font-size: calc(8 * var(--u));
        background: linear-gradient(#7ad0ff, #2f9df0); text-shadow: 0 3px 0 rgba(0,0,0,.25);
        box-shadow: 0 0 0 5px #fff8e8, 0 0 0 9px #cfeeff, 0 10px 0 9px rgba(0,0,0,.18); }
-  .tiles { flex: 1; display: grid; gap: 3vmin; padding: 3vmin 3vmin 5vmin; grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; }
-  @media (orientation: portrait) { .tiles { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); } }
+  .tiles { flex: 1; display: grid; gap: calc(3 * var(--u)); padding: calc(3 * var(--u)) calc(3 * var(--u)) calc(5 * var(--u)); grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); }
+  @media (orientation: portrait) { .tiles { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, minmax(0, 1fr)); } }
   .tile {
-    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5vmin;
-    padding: 2vmin; border-radius: 5vmin; text-decoration: none; color: #fff;
+    min-height: 0; min-width: 0;
+    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(1.5 * var(--u));
+    padding: calc(2 * var(--u)); border-radius: calc(5 * var(--u)); text-decoration: none; color: #fff;
     background: linear-gradient(var(--light), var(--c) 60%, var(--dark));
     box-shadow: 0 0 0 5px #fff8e8, 0 0 0 9px #fff, 0 14px 0 9px rgba(0,0,0,.18), inset 0 4px 0 rgba(255,255,255,.5);
     transition: transform .1s, box-shadow .1s;
   }
-  .tile::before { content: ''; position: absolute; left: 6%; right: 6%; top: 4%; height: 30%; border-radius: 5vmin;
+  .tile::before { content: ''; position: absolute; left: 6%; right: 6%; top: 4%; height: 30%; border-radius: calc(5 * var(--u));
                   background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,0)); pointer-events: none; }
   .tile:active { transform: translateY(8px); box-shadow: 0 0 0 5px #fff8e8, 0 0 0 9px #fff, 0 6px 0 9px rgba(0,0,0,.18); }
   .tile .who { height: 62%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; filter: drop-shadow(0 10px 8px rgba(0,0,0,.3)); animation: wiggle 2.5s ease-in-out infinite; }
   .tile .who .char { width: auto; max-width: 100%; }
-  .tile:nth-child(5) .who { animation-delay: -1.2s; } .tile:nth-child(6) .who { animation-delay: -.4s; }
+  .tile:nth-child(5) .who { animation-delay: -1.2s; } .tile:nth-child(6) .who { animation-delay: -.4s; } .tile:nth-child(7) .who { animation-delay: -2s; } .tile:nth-child(8) .who { animation-delay: -1s; }
   .tile:nth-child(2) .who { animation-delay: -.8s; } .tile:nth-child(3) .who { animation-delay: -1.6s; }
   @keyframes wiggle { 0%,100% { transform: rotate(-5deg) } 50% { transform: rotate(5deg) translateY(-8px) } }
   .tile:nth-child(4) .who { animation-delay: -2.2s; }
-  .tile .name { font-size: 4.2vmin; font-weight: 800; text-shadow: 0 3px 0 rgba(0,0,0,.25); text-align: center; white-space: nowrap; }
+  .tile .name { font-size: calc(4.2 * var(--u)); font-weight: 800; text-shadow: 0 3px 0 rgba(0,0,0,.25); text-align: center; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -52,6 +53,8 @@
       <a class="tile" href="silly-beans/index.html" style="--c:#845ef7;--light:#b197fc;--dark:#5f3dc4"><div class="who" id="w4"></div><span class="name">Silly Beans</span></a>
       <a class="tile" href="moo-farm/index.html" style="--c:#ff6b6b;--light:#ffa8a8;--dark:#c92a2a"><div class="who" id="w5"></div><span class="name">Moo Farm</span></a>
       <a class="tile" href="monkey-bananas/index.html" style="--c:#fcc419;--light:#ffe066;--dark:#e67700"><div class="who" id="w6"></div><span class="name">Monkey Bananas</span></a>
+      <a class="tile" href="dino-stomp/index.html" style="--c:#20c997;--light:#63e6be;--dark:#0ca678"><div class="who" id="w7"></div><span class="name">Dino Stomp</span></a>
+      <a class="tile" href="wheels-on-the-bus/index.html" style="--c:#f06595;--light:#faa2c1;--dark:#c2255c"><div class="who" id="w8"></div><span class="name">Wheels on the Bus</span></a>
     </div>
   </div>
 <script src="shared/toddler.js"></script>
@@ -63,6 +66,8 @@
   document.getElementById('w4').innerHTML = Chars.bean('#69db7c', 'silly');
   document.getElementById('w5').innerHTML = Chars.cow('#333');
   document.getElementById('w6').innerHTML = Chars.monkey('#a0693b');
+  document.getElementById('w7').innerHTML = Chars.dino('#51cf66', 'rex');
+  document.getElementById('w8').innerHTML = '<span style="font-size:calc(14 * var(--u))">🚌</span>';
   Chars.startBlinking();
   document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
   Toddler.guardKeys();
