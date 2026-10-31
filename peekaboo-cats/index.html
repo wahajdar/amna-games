@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amna's Games">
+<meta name="theme-color" content="#339af0">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>Peekaboo Cats</title>
+<link rel="stylesheet" href="../shared/toddler.css">
+<style>
+  .wall { --s1: #ffd8a8; --s2: #ffe8cc; }
+  .floor { background: linear-gradient(#f783ac, #e64980); }
+  .room {
+    position: absolute; inset: 0; z-index: 1; display: grid; gap: 3vmin; padding: 6vmin 5vmin 7vmin;
+    grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); align-items: end;
+  }
+  @media (orientation: portrait) { .room { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); } }
+  .spot { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+
+  /* Character hiding inside the box */
+  .who {
+    position: absolute; bottom: 13vmin; width: 21vmin; height: 21vmin; z-index: 1; pointer-events: none;
+    transform: translateY(70%) scale(.3); opacity: 0;
+    transition: transform .4s cubic-bezier(.3,1.5,.5,1), opacity .15s;
+    filter: drop-shadow(0 8px 6px rgba(0,0,0,.3));
+  }
+  .spot.open .who { transform: translateY(0) scale(1); opacity: 1; }
+
+  /* CSS gift box */
+  .box { position: relative; width: 24vmin; height: 16vmin; z-index: 2; transition: transform .15s; }
+  .box .base {
+    position: absolute; inset: 0; border-radius: 2vmin;
+    background: linear-gradient(var(--light), var(--c) 55%, var(--dark));
+    box-shadow: 0 0 0 4px #fff8e8, 0 8px 0 4px rgba(0,0,0,.2), inset 0 3px 0 rgba(255,255,255,.5);
+  }
+  .box .ribbon { position: absolute; left: 50%; top: 0; bottom: 0; width: 4vmin; transform: translateX(-50%);
+                 background: linear-gradient(90deg, #fff3bf, #ffe066, #f0c419); box-shadow: inset 0 0 0 2px rgba(0,0,0,.1); }
+  .box .lid {
+    position: absolute; left: -1.5vmin; right: -1.5vmin; top: -4vmin; height: 5vmin; border-radius: 1.5vmin;
+    background: linear-gradient(var(--light), var(--c));
+    box-shadow: 0 0 0 4px #fff8e8, 0 4px 0 4px rgba(0,0,0,.15);
+    transform-origin: left bottom; transition: transform .35s cubic-bezier(.3,1.4,.5,1); z-index: 3;
+  }
+  .box .lid::after { content: '🎀'; position: absolute; left: 50%; top: -3.5vmin; transform: translateX(-50%); font-size: 5vmin; }
+  .spot.open .lid { transform: rotate(-110deg) translateX(-1vmin); }
+  .spot.wobble .box { animation: wobble .4s; }
+  @keyframes wobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-8deg) scale(1.05); } 75% { transform: rotate(8deg) scale(1.05); } }
+
+  .say {
+    position: absolute; top: -1vmin; left: 50%; transform: translateX(-50%) scale(0);
+    transition: transform .25s cubic-bezier(.3,1.6,.5,1); z-index: 4; white-space: nowrap;
+    --c:#51cf66; --c-light:#8ce99a; --c-dark:#2f9e44; --rim:#fff; font-size: 4.2vmin; padding: .8vmin 3vmin;
+  }
+  .spot.open .say { transform: translateX(-50%) scale(1); }
+</style>
+</head>
+<body>
+  <div class="wall"></div>
+  <div class="floor"></div>
+  <div class="room" id="room"></div>
+
+<script src="../shared/toddler.js"></script>
+<script src="../shared/characters.js"></script>
+<script>
+(function () {
+  const { S, guardKeys, addParentBar, pick, burst } = Toddler;
+  addParentBar();
+  Chars.startBlinking();
+
+  const BOX_COLORS = ['#4dabf7', '#51cf66', '#ff6b6b', '#845ef7', '#ff922b', '#20c997'];
+  const CAT_COLORS = ['#ffa94d', '#ced4da', '#ff8787', '#ffd43b', '#b197fc', '#63e6be', '#f8f9fa', '#e599f7'];
+  const WORDS = { cat: ['Peekaboo!', 'Meow!', 'Boo!', 'Hi Amna!', 'Found me!'], shark: ['Splash!', 'Chomp!'], fish: ['Bloop!'] };
+
+  const room = document.getElementById('room');
+  const spots = BOX_COLORS.map((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'spot';
+    el.innerHTML = `
+      <div class="candy say"></div>
+      <div class="who"></div>
+      <div class="box" style="--c:${c};--light:${Chars.shade(c, 35)};--dark:${Chars.shade(c, -25)}">
+        <div class="base"></div><div class="ribbon"></div><div class="lid"></div>
+      </div>`;
+    room.appendChild(el);
+    el.addEventListener('pointerdown', (e) => { Toddler.audio(); open(i, e.clientX, e.clientY); });
+    return { el, busy: false };
+  });
+
+  function open(i, x, y) {
+    const s = spots[i];
+    if (s.busy) return;
+    s.busy = true;
+    const roll = Math.random();
+    const kind = roll < .72 ? 'cat' : roll < .88 ? 'shark' : 'fish';
+    const svg = kind === 'cat' ? Chars.cat(pick(CAT_COLORS)) : kind === 'shark' ? Chars.shark(pick(['#4dabf7', '#f783ac', '#ffd43b'])) : Chars.fish(pick(['#ffd43b', '#ff8787', '#63e6be']));
+    s.el.querySelector('.who').innerHTML = svg;
+    s.el.querySelector('.say').textContent = pick(WORDS[kind]);
+
+    s.el.classList.add('wobble');
+    S.pop();
+    setTimeout(() => {
+      s.el.classList.remove('wobble');
+      s.el.classList.add('open');
+      if (kind === 'cat') { S.meow(Math.random()); if (Math.random() < .4) setTimeout(() => S.giggle(), 450); }
+      else if (kind === 'shark') S.splash();
+      else S.bloop();
+      const r = s.el.getBoundingClientRect();
+      burst(x ?? r.left + r.width / 2, y ?? r.top + r.height / 2, ['🎉', '⭐', '✨', '💖', '🎈'], 12, 180);
+      Chars.lookAt(x ?? r.left + r.width / 2, (y ?? r.top) - 200);
+    }, 380);
+
+    setTimeout(() => { s.el.classList.remove('open'); s.busy = false; }, 2400);
+  }
+
+  document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
+  guardKeys(() => {
+    Toddler.audio();
+    const free = spots.map((s, i) => i).filter(i => !spots[i].busy);
+    if (free.length) open(pick(free));
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amna's Games">
+<meta name="theme-color" content="#339af0">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>Shark Splash</title>
+<link rel="stylesheet" href="../shared/toddler.css">
+<style>
+  body { background: linear-gradient(#9ff0ff 0%, #9ff0ff 20%, #35c4f5 20.5%, #1a9be8 55%, #0f66b8 100%); }
+  .sun { position: absolute; top: 4vh; left: 7vw; width: 15vmin; height: 15vmin; border-radius: 50%;
+         background: radial-gradient(circle at 40% 35%, #fff6b0, #ffd43b); box-shadow: 0 0 70px 24px rgba(255,220,80,.55); }
+  .sun::after { content: ''; position: absolute; inset: -14%; border-radius: 50%; border: 5px dashed rgba(255,255,255,.6); animation: spinSlow 30s linear infinite; }
+  @keyframes spinSlow { to { transform: rotate(360deg); } }
+  .cloud { position: absolute; top: 5vh; width: 18vmin; height: 7vmin; background: #fff; border-radius: 100px; opacity: .95; animation: drift linear infinite; }
+  .cloud::before, .cloud::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+  .cloud::before { width: 9vmin; height: 9vmin; left: 3vmin; top: -5vmin; }
+  .cloud::after { width: 7vmin; height: 7vmin; left: 9vmin; top: -3.5vmin; }
+  @keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(120vw); } }
+
+  .wave { position: absolute; left: -10%; width: 120%; height: 6vh; top: 17.5%;
+          background: radial-gradient(circle at 10px 100%, transparent 18px, #35c4f5 19px) 0 0 / 40px 100% repeat-x;
+          animation: waveMove 3s linear infinite; }
+  @keyframes waveMove { from { background-position-x: 0; } to { background-position-x: 40px; } }
+  .ray { position: absolute; top: 20%; width: 12vw; height: 60vh; background: linear-gradient(rgba(255,255,255,.28), transparent); transform: skewX(-12deg); pointer-events: none; }
+
+  .seafloor { position: absolute; bottom: 0; left: 0; right: 0; height: 10vh;
+              background: linear-gradient(#f2d59a, #d8a95f); border-radius: 50% 50% 0 0 / 40px 40px 0 0; box-shadow: 0 -6px 0 rgba(255,255,255,.35); }
+  .plant { position: absolute; bottom: 7vh; font-size: 10vmin; transform-origin: bottom center; animation: sway 3s ease-in-out infinite alternate; }
+  @keyframes sway { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+
+  .swimmer { position: absolute; left: 0; top: 0; will-change: transform; }
+  .swimmer .char { filter: drop-shadow(0 8px 6px rgba(0,0,0,.25)); }
+  .swimmer.jump .inner { animation: jump .85s cubic-bezier(.3,1.4,.6,1) forwards; }
+  @keyframes jump {
+    0%   { transform: translateY(0) rotate(0); }
+    45%  { transform: translateY(-40vh) rotate(-28deg); }
+    100% { transform: translateY(0) rotate(0); }
+  }
+  .fish.pop .inner { animation: fishpop .35s ease-out forwards; }
+  @keyframes fishpop { to { transform: scale(2.2); opacity: 0; } }
+
+  .bubble { position: absolute; border-radius: 50%; border: 2px solid rgba(255,255,255,.85);
+            background: radial-gradient(circle at 35% 35%, rgba(255,255,255,.8), rgba(255,255,255,.08));
+            pointer-events: none; animation: rise linear forwards; }
+  @keyframes rise { to { transform: translateY(-70vh) translateX(var(--wob)); opacity: 0; } }
+
+  .hint { position: absolute; bottom: 13vh; left: 50%; transform: translateX(-50%); pointer-events: none;
+          --c:#ff8c42; --c-light:#ffc36e; --c-dark:#d9641c; --rim:#fff; animation: fade 7s forwards; }
+  @keyframes fade { 0%,75% { opacity: 1 } 100% { opacity: 0 } }
+</style>
+</head>
+<body>
+  <div class="sun"></div>
+  <div class="cloud" style="animation-duration: 70s; left: 0;"></div>
+  <div class="cloud" style="animation-duration: 95s; left: 45vw; top: 8vh; transform: scale(.7);"></div>
+  <div class="ray" style="left: 20vw"></div><div class="ray" style="left: 55vw; width: 8vw"></div><div class="ray" style="left: 80vw"></div>
+  <div class="seafloor"></div>
+  <div class="plant" style="left: 6vw;">🌿</div>
+  <div class="plant" style="left: 28vw; animation-delay: -1s;">🪸</div>
+  <div class="plant" style="left: 60vw; animation-delay: -2s;">🌿</div>
+  <div class="plant" style="left: 84vw; animation-delay: -.5s;">🪸</div>
+  <div class="candy hint">Tap the sharks! 🦈</div>
+
+<script src="../shared/toddler.js"></script>
+<script src="../shared/characters.js"></script>
+<script>
+(function () {
+  const { S, guardKeys, onPress, addParentBar, rand, pick, burst } = Toddler;
+  addParentBar();
+  Chars.startBlinking();
+
+  const W = () => innerWidth, H = () => innerHeight;
+  const vmin = Math.min(W(), H()) / 100;
+  const swimmers = [];
+  const FISH_COLORS = ['#ffd43b', '#ff8787', '#63e6be', '#da77f2', '#ffa94d', '#74c0fc'];
+
+  function makeSwimmer(kind, width, y, speed, color) {
+    const el = document.createElement('div');
+    el.className = 'swimmer ' + kind;
+    const h = kind === 'shark' ? width * .6 : width * .69;
+    el.style.width = width + 'px'; el.style.height = h + 'px';
+    el.innerHTML = `<div class="inner" style="width:100%;height:100%">${kind === 'shark' ? Chars.shark(color) : Chars.fish(color)}</div>`;
+    document.body.appendChild(el);
+    const s = { el, kind, w: width, h, x: rand(0, W()), y, vx: speed * (Math.random() < .5 ? -1 : 1), wob: rand(0, 6.28), busy: false };
+    swimmers.push(s);
+    return s;
+  }
+
+  // Shark family: big blue, medium pink, small yellow. Fish in between.
+  makeSwimmer('shark', 42 * vmin, H() * .26, 1.5, '#4dabf7');
+  makeSwimmer('shark', 30 * vmin, H() * .47, 2.1, '#f783ac');
+  makeSwimmer('shark', 20 * vmin, H() * .64, 2.9, '#ffd43b');
+  for (let i = 0; i < 6; i++) makeSwimmer('fish', rand(11, 15) * vmin, rand(H() * .25, H() * .82), rand(1, 2.4), pick(FISH_COLORS));
+
+  function frame() {
+    const t = performance.now() / 1000;
+    for (const s of swimmers) {
+      s.x += s.vx;
+      if (s.x < -s.w * 1.2) { s.x = -s.w * 1.2; s.vx = Math.abs(s.vx); }
+      if (s.x > W() + s.w * .2) { s.x = W() + s.w * .2; s.vx = -Math.abs(s.vx); }
+      const bob = Math.sin(t * 2 + s.wob) * s.h * .08;
+      const flip = s.vx > 0 ? -1 : 1;               // characters face left by default
+      s.el.style.transform = `translate(${s.x}px, ${s.y + bob}px) scaleX(${flip})`;
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+
+  function bubbles(x, y, n = 8) {
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement('div');
+      b.className = 'bubble';
+      const sz = rand(10, 36);
+      b.style.width = b.style.height = sz + 'px';
+      b.style.left = x + rand(-40, 40) + 'px'; b.style.top = y + rand(-20, 20) + 'px';
+      b.style.setProperty('--wob', rand(-60, 60) + 'px');
+      b.style.animationDuration = rand(1.2, 2.4) + 's';
+      document.body.appendChild(b);
+      b.addEventListener('animationend', () => b.remove());
+    }
+  }
+
+  function jumpShark(s) {
+    if (s.busy) return;
+    s.busy = true;
+    s.el.classList.add('jump');
+    S.splash();
+    if (Math.random() < .5) S.whee(); else S.boing();
+    setTimeout(() => S.bloop(), 350);
+    setTimeout(() => { s.el.classList.remove('jump'); s.busy = false; }, 900);
+  }
+
+  function popFish(s, x, y) {
+    if (s.busy) return;
+    s.busy = true;
+    s.el.classList.add('pop');
+    S.pop();
+    burst(x, y, ['⭐', '✨', '💛', '🫧'], 8, 140);
+    bubbles(x, y, 6);
+    setTimeout(() => {
+      s.el.classList.remove('pop');
+      s.el.querySelector('.inner').innerHTML = Chars.fish(pick(FISH_COLORS));
+      s.x = s.vx > 0 ? -s.w * 1.2 : W() + s.w * .2;
+      s.y = rand(H() * .25, H() * .82);
+      s.busy = false;
+    }, 380);
+  }
+
+  function nearest(kind, x, y, maxDist) {
+    let best = null, bd = Infinity;
+    for (const s of swimmers) {
+      if (s.kind !== kind) continue;
+      const d = Math.hypot(s.x + s.w / 2 - x, s.y + s.h / 2 - y);
+      if (d < bd) { bd = d; best = s; }
+    }
+    return bd <= maxDist ? best : null;
+  }
+
+  function press(x, y) {
+    Chars.lookAt(x, y);
+    const fish = nearest('fish', x, y, 12 * vmin);
+    if (fish) { popFish(fish, x, y); return; }
+    bubbles(x, y, 10);
+    const shark = nearest('shark', x, y, Infinity);
+    if (shark) jumpShark(shark); else S.bloop();
+  }
+
+  onPress(document.body, press);
+  document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
+  guardKeys(() => {
+    Toddler.audio();
+    press(rand(W() * .15, W() * .85), rand(H() * .3, H() * .8));
+    jumpShark(pick(swimmers.filter(s => s.kind === 'shark')));
+  });
+
+  setInterval(() => bubbles(rand(0, W()), H() * .9, 2), 900);
+})();
+</script>
+</body>
+</html>

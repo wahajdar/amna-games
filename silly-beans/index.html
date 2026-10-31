@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amna's Games">
+<meta name="theme-color" content="#339af0">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>Silly Beans</title>
+<link rel="stylesheet" href="../shared/toddler.css">
+<style>
+  .wall { --s1: #ffe066; --s2: #fff3bf; }
+  .floor { height: 26%; background: linear-gradient(#845ef7, #5f3dc4); }
+  .bunting { position: absolute; top: 0; left: 0; right: 0; height: 9vmin; z-index: 1; pointer-events: none;
+    background:
+      linear-gradient(135deg, transparent 50%, #ff6b6b 50%) 0 0 / 6vmin 100% repeat-x,
+      linear-gradient(225deg, transparent 50%, #ff6b6b 50%) 0 0 / 6vmin 100% repeat-x; }
+  .bunting::after { content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(90deg, transparent 0 6vmin, rgba(255,255,255,.35) 6vmin 12vmin); mix-blend-mode: screen; }
+
+  .bean { position: absolute; left: 0; bottom: 20%; width: 24vmin; height: 27.6vmin; z-index: 2; will-change: transform; }
+  .bean .inner { width: 100%; height: 100%; transform-origin: 50% 100%; filter: drop-shadow(0 10px 8px rgba(0,0,0,.3)); }
+  .bean .shadow { position: absolute; left: 15%; right: 15%; bottom: -2vmin; height: 3vmin; border-radius: 50%; background: rgba(0,0,0,.25); z-index: -1; }
+
+  .bean.jump .inner  { animation: jump .7s cubic-bezier(.3,1.5,.6,1); }
+  .bean.spin .inner  { animation: spin1 .8s ease-in-out; }
+  .bean.wobble .inner{ animation: wob .7s ease-in-out; }
+  .bean.honk .inner  { animation: honk .55s ease-in-out; }
+  .bean.shake .inner { animation: shake .6s linear; }
+  .bean.squash .inner{ animation: squash .6s ease-in-out; }
+  .bean.sneeze .inner{ animation: sneeze .7s ease-in-out; }
+  @keyframes jump  { 0%{transform:translateY(0) scale(1,1)} 15%{transform:translateY(0) scale(1.15,.8)} 50%{transform:translateY(-34vh) scale(.9,1.15)} 85%{transform:translateY(0) scale(1.15,.85)} 100%{transform:translateY(0)} }
+  @keyframes spin1 { to { transform: rotate(360deg); } }
+  @keyframes wob   { 0%,100%{transform:rotate(0)} 20%{transform:rotate(-18deg)} 40%{transform:rotate(16deg)} 60%{transform:rotate(-12deg)} 80%{transform:rotate(8deg)} }
+  @keyframes honk  { 0%,100%{transform:scale(1)} 40%{transform:scale(1.35,1.2)} 60%{transform:scale(1.3,1.25)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 10%,30%,50%,70%,90%{transform:translateX(-3vmin) rotate(-4deg)} 20%,40%,60%,80%{transform:translateX(3vmin) rotate(4deg)} }
+  @keyframes squash{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.5,.5)} }
+  @keyframes sneeze{ 0%{transform:scale(1)} 35%{transform:scale(1.1,1.2) translateY(-2vmin)} 45%{transform:scale(1.1,1.2) translateY(-3vmin)} 55%{transform:scale(1.2,.8) translateY(0) rotate(12deg)} 100%{transform:scale(1)} }
+
+  .puff { position: absolute; font-size: 8vmin; z-index: 1; pointer-events: none; animation: puff .8s ease-out forwards; }
+  @keyframes puff { from { opacity: 1; transform: scale(.4) } to { opacity: 0; transform: scale(1.8) translateX(-6vmin) } }
+
+  .hint { position: absolute; top: 12vmin; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 3;
+          --c:#20c997; --c-light:#63e6be; --c-dark:#0ca678; --rim:#fff; animation: fade 7s forwards; }
+  @keyframes fade { 0%,75% { opacity: 1 } 100% { opacity: 0 } }
+</style>
+</head>
+<body>
+  <div class="wall"></div>
+  <div class="bunting"></div>
+  <div class="floor"></div>
+  <div class="candy hint">Tap a Silly Bean! 🎉</div>
+
+<script src="../shared/toddler.js"></script>
+<script src="../shared/characters.js"></script>
+<script>
+(function () {
+  const { S, guardKeys, onPress, addParentBar, rand, pick, burst } = Toddler;
+  addParentBar();
+  Chars.startBlinking();
+
+  const W = () => innerWidth, H = () => innerHeight;
+  const vmin = () => Math.min(W(), H()) / 100;
+  const COLORS = ['#ff8787', '#69db7c', '#74c0fc', '#da77f2', '#ffa94d'];
+  const beans = [];
+
+  COLORS.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'bean';
+    el.innerHTML = `<div class="inner">${Chars.bean(c)}</div><div class="shadow"></div>`;
+    document.body.appendChild(el);
+    const b = { el, color: c, x: (i + .5) * W() / COLORS.length - 12 * vmin(), vx: rand(.3, .8) * (Math.random() < .5 ? -1 : 1), busy: false, wob: rand(0, 6.28) };
+    beans.push(b);
+    el.addEventListener('pointerdown', (e) => { e.stopPropagation(); Toddler.audio(); trick(b, pick(TRICKS), e.clientX, e.clientY); });
+  });
+
+  function setMood(b, mood) { b.el.querySelector('.inner').innerHTML = Chars.bean(b.color, mood); }
+
+  // Each trick: css animation class, sound, duration, face, particles.
+  const TRICKS = [
+    { cls: 'jump',   dur: 700, mood: 'happy', sfx: () => S.boing(),  fx: ['⭐', '✨'] },
+    { cls: 'spin',   dur: 800, mood: 'wow',   sfx: () => S.whee(),   fx: ['🌀', '💫', '⭐'] },
+    { cls: 'wobble', dur: 700, mood: 'silly', sfx: () => S.babble(), fx: ['💬', '❓', '🎵'] },
+    { cls: 'honk',   dur: 550, mood: 'wow',   sfx: () => S.honk(),   fx: ['📣', '💥'] },
+    { cls: 'shake',  dur: 600, mood: 'happy', sfx: () => S.giggle(), fx: ['😂', '💖', '✨'] },
+    { cls: 'squash', dur: 600, mood: 'silly', sfx: () => S.toot(),   fx: ['💨'], puff: true },
+    { cls: 'sneeze', dur: 700, mood: 'wow',   sfx: () => S.sneeze(), fx: ['💦', '🤧'] },
+  ];
+
+  function trick(b, t, x, y) {
+    if (b.busy) return;
+    b.busy = true;
+    setMood(b, t.mood);
+    b.el.classList.add(t.cls);
+    t.sfx();
+    const r = b.el.getBoundingClientRect();
+    burst(x ?? r.left + r.width / 2, y ?? r.top + r.height / 3, t.fx, 7, 150);
+    if (t.puff) {
+      const p = document.createElement('div');
+      p.className = 'puff'; p.textContent = '💨';
+      p.style.left = (r.left + (b.vx > 0 ? -r.width * .2 : r.width * .9)) + 'px'; p.style.top = (r.top + r.height * .7) + 'px';
+      document.body.appendChild(p); p.addEventListener('animationend', () => p.remove());
+    }
+    setTimeout(() => { b.el.classList.remove(t.cls); setMood(b, 'happy'); b.busy = false; }, t.dur + 50);
+  }
+
+  function everyoneJump() {
+    S.drum();
+    beans.forEach((b, i) => setTimeout(() => trick(b, TRICKS[0]), i * 80));
+  }
+
+  // Wander along the floor, bobbing.
+  function frame() {
+    const t = performance.now() / 1000;
+    for (const b of beans) {
+      if (!b.busy) b.x += b.vx;
+      const w = 24 * vmin();
+      if (b.x < 0) { b.x = 0; b.vx = Math.abs(b.vx); }
+      if (b.x > W() - w) { b.x = W() - w; b.vx = -Math.abs(b.vx); }
+      const bob = Math.abs(Math.sin(t * 4 + b.wob)) * 1.2 * vmin();
+      const flip = b.vx > 0 ? 1 : -1;
+      b.el.style.transform = `translate(${b.x}px, ${-bob}px) scaleX(${flip})`;
+      if (Math.random() < 0.0015) b.vx = -b.vx;
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+
+  onPress(document.body, (x, y) => { Chars.lookAt(x, y); everyoneJump(); });
+  document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
+  guardKeys(() => {
+    Toddler.audio();
+    const free = beans.filter(b => !b.busy);
+    if (free.length) trick(pick(free), pick(TRICKS));
+  });
+
+  // Now and then a bean does something on its own so the room feels alive.
+  setInterval(() => { if (Math.random() < .5) { const free = beans.filter(b => !b.busy); if (free.length) trick(pick(free), pick(TRICKS)); } }, 4000);
+})();
+</script>
+</body>
+</html>

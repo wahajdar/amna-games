@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amna's Games">
+<meta name="theme-color" content="#339af0">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>Moo Farm</title>
+<link rel="stylesheet" href="../shared/toddler.css">
+<style>
+  body { background: linear-gradient(#7fd3ff, #c9efff 55%, #c9efff); }
+  .sun { position: absolute; top: 6vh; right: 10vw; width: 14vmin; height: 14vmin; border-radius: 50%;
+         background: radial-gradient(circle at 40% 35%, #fff6b0, #ffd43b); box-shadow: 0 0 70px 24px rgba(255,220,80,.55); }
+  .moon { position: absolute; top: 6vh; left: 8vw; width: 13vmin; height: 13vmin; border-radius: 50%; z-index: 3;
+          background: radial-gradient(circle at 40% 35%, #fff, #e9ecef); box-shadow: 0 0 40px 10px rgba(255,255,255,.6), inset -2vmin -1vmin 0 rgba(0,0,0,.08); }
+  .moon::after { content: '🌙'; display: none; }
+  .moon .crater { position: absolute; border-radius: 50%; background: rgba(0,0,0,.08); }
+  .cloud { position: absolute; width: 18vmin; height: 7vmin; background: #fff; border-radius: 100px; animation: drift linear infinite; }
+  .cloud::before, .cloud::after { content: ''; position: absolute; background: #fff; border-radius: 50%; }
+  .cloud::before { width: 9vmin; height: 9vmin; left: 3vmin; top: -5vmin; }
+  .cloud::after { width: 7vmin; height: 7vmin; left: 9vmin; top: -3.5vmin; }
+  @keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(120vw); } }
+
+  .hill { position: absolute; border-radius: 50%; background: linear-gradient(#a9e34b, #74b816); }
+  .h1 { left: -20vw; width: 80vw; height: 40vh; bottom: 28vh; }
+  .h2 { right: -25vw; width: 90vw; height: 44vh; bottom: 26vh; background: linear-gradient(#8ce99a, #51cf66); }
+  .field { position: absolute; left: 0; right: 0; bottom: 0; height: 40vh; background: linear-gradient(#69db7c, #40c057 60%, #2f9e44); }
+  .barn { position: absolute; right: 6vw; bottom: 36vh; width: 26vmin; height: 20vmin; background: linear-gradient(#ff6b6b, #e03131);
+          border: 5px solid #222; border-radius: 2vmin 2vmin 0 0; }
+  .barn::before { content: ''; position: absolute; left: -8%; right: -8%; top: -9vmin; height: 9vmin; background: #c92a2a; border: 5px solid #222; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+  .barn::after { content: ''; position: absolute; left: 50%; bottom: -5px; width: 9vmin; height: 12vmin; transform: translateX(-50%); background: #5c3d1e; border: 5px solid #222; border-radius: 4vmin 4vmin 0 0; }
+  .fence { position: absolute; left: 0; right: 0; bottom: 33vh; height: 9vmin; pointer-events: none;
+           background: repeating-linear-gradient(90deg, #fff 0 2.5vmin, transparent 2.5vmin 9vmin); }
+  .fence::before, .fence::after { content: ''; position: absolute; left: 0; right: 0; height: 1.8vmin; background: #fff; }
+  .fence::before { top: 25%; } .fence::after { top: 60%; }
+  .flower { position: absolute; font-size: 5vmin; pointer-events: none; }
+
+  .cow { position: absolute; left: 0; bottom: 8vh; width: 30vmin; height: 21.5vmin; z-index: 2; will-change: transform; }
+  .cow .inner { width: 100%; height: 100%; transform-origin: 50% 100%; filter: drop-shadow(0 8px 6px rgba(0,0,0,.3)); }
+  .cow.kick .inner { animation: kick .7s cubic-bezier(.3,1.4,.6,1); }
+  @keyframes kick { 0%{transform:translateY(0) rotate(0)} 30%{transform:translateY(-10vh) rotate(-10deg)} 60%{transform:translateY(-6vh) rotate(8deg)} 100%{transform:translateY(0) rotate(0)} }
+  .cow.wiggle .inner { animation: wiggle .6s ease-in-out; }
+  @keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-6deg)} 75%{transform:rotate(6deg)} }
+  .cow.overmoon { z-index: 5; }
+  .cow.overmoon .inner { animation: overmoon 2.6s ease-in-out forwards; }
+  @keyframes overmoon { 0%{transform:translate(0,0) rotate(0)} 50%{transform:translate(var(--mx), var(--my)) rotate(-25deg) scale(.8)} 100%{transform:translate(0,0) rotate(0)} }
+
+  .night { position: absolute; inset: 0; background: #1b1b4b; opacity: 0; transition: opacity .6s; pointer-events: none; z-index: 1; }
+  body.dark .night { opacity: .55; }
+  .star { position: absolute; color: #fff; font-size: 3vmin; opacity: 0; transition: opacity .6s; z-index: 1; }
+  body.dark .star { opacity: 1; animation: twinkle 1.2s infinite alternate; }
+  @keyframes twinkle { to { opacity: .3; } }
+
+  .hint { position: absolute; top: 24vh; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 3;
+          --c:#ff922b; --c-light:#ffc078; --c-dark:#e8590c; --rim:#fff; animation: fade 7s forwards; }
+  @keyframes fade { 0%,75% { opacity: 1 } 100% { opacity: 0 } }
+</style>
+</head>
+<body>
+  <div class="night"></div>
+  <div class="sun"></div>
+  <div class="moon" id="moon"><div class="crater" style="width:30%;height:30%;left:20%;top:25%"></div><div class="crater" style="width:18%;height:18%;left:60%;top:55%"></div></div>
+  <div class="cloud" style="top: 8vh; animation-duration: 80s;"></div>
+  <div class="cloud" style="top: 16vh; left: 50vw; transform: scale(.7); animation-duration: 110s;"></div>
+  <div class="hill h1"></div><div class="hill h2"></div>
+  <div class="field"></div>
+  <div class="barn"></div>
+  <div class="fence"></div>
+  <div class="candy hint">Tap the cows! 🐄</div>
+
+<script src="../shared/toddler.js"></script>
+<script src="../shared/characters.js"></script>
+<script>
+(function () {
+  const { S, guardKeys, onPress, addParentBar, rand, pick, burst } = Toddler;
+  addParentBar();
+  Chars.startBlinking();
+
+  const W = () => innerWidth, H = () => innerHeight;
+  const vmin = () => Math.min(W(), H()) / 100;
+
+  // Flowers and stars for decoration
+  for (let i = 0; i < 10; i++) { const f = document.createElement('div'); f.className = 'flower'; f.textContent = pick(['🌼', '🌷', '🌸']); f.style.left = rand(0, 95) + 'vw'; f.style.bottom = rand(2, 30) + 'vh'; document.body.appendChild(f); }
+  for (let i = 0; i < 18; i++) { const s = document.createElement('div'); s.className = 'star'; s.textContent = '✦'; s.style.left = rand(0, 98) + 'vw'; s.style.top = rand(2, 45) + 'vh'; s.style.animationDelay = rand(0, 1) + 's'; document.body.appendChild(s); }
+
+  const cows = [];
+  const PATCHES = ['#333', '#8d5524', '#e8590c', '#845ef7'];
+  PATCHES.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'cow';
+    el.innerHTML = `<div class="inner">${Chars.cow(p)}</div>`;
+    document.body.appendChild(el);
+    const c = { el, big: i < 2, x: rand(0, W() - 30 * vmin()), y: rand(0, 18) * vmin(), vx: rand(.15, .4) * (Math.random() < .5 ? -1 : 1), busy: false };
+    cows.push(c);
+    el.addEventListener('pointerdown', (e) => { e.stopPropagation(); Toddler.audio(); tapCow(c, e.clientX, e.clientY); });
+  });
+  cows.sort((a, b) => a.y - b.y).forEach((c, i) => c.el.style.zIndex = 2 + (3 - i)); // lower cows in front
+
+  function tapCow(c, x, y) {
+    if (c.busy) return;
+    c.busy = true;
+    const r = Math.random();
+    if (r < .6) { c.el.classList.add('kick'); S.moo(c.big); burst(x, y, ['💛', '🌼', '✨'], 7, 140); }
+    else { c.el.classList.add('wiggle'); S.bell(); setTimeout(() => S.moo(c.big), 250); burst(x, y, ['🔔', '🎵', '💖'], 7, 140); }
+    setTimeout(() => { c.el.classList.remove('kick', 'wiggle'); c.busy = false; }, 800);
+  }
+
+  // Hey diddle diddle: tap the moon and a cow jumps over it.
+  document.getElementById('moon').addEventListener('pointerdown', (e) => {
+    e.stopPropagation(); Toddler.audio();
+    const free = cows.filter(c => !c.busy); if (!free.length) return;
+    const c = pick(free); c.busy = true;
+    const m = document.getElementById('moon').getBoundingClientRect();
+    const r = c.el.getBoundingClientRect();
+    c.el.style.setProperty('--mx', (m.left + m.width / 2 - (r.left + r.width / 2)) + 'px');
+    c.el.style.setProperty('--my', (m.top - r.top - r.height * .6) + 'px');
+    c.el.classList.add('overmoon');
+    document.body.classList.add('dark');
+    S.whee(); setTimeout(() => S.chime(), 900); setTimeout(() => S.moo(c.big), 2000);
+    burst(m.left + m.width / 2, m.top + m.height / 2, ['⭐', '🌟', '✨'], 12, 200);
+    setTimeout(() => { c.el.classList.remove('overmoon'); c.busy = false; document.body.classList.remove('dark'); }, 2700);
+  });
+
+  function frame() {
+    for (const c of cows) {
+      if (!c.busy) c.x += c.vx;
+      const w = 30 * vmin();
+      if (c.x < 0) { c.x = 0; c.vx = Math.abs(c.vx); }
+      if (c.x > W() - w) { c.x = W() - w; c.vx = -Math.abs(c.vx); }
+      const flip = c.vx > 0 ? -1 : 1;   // cow faces left by default
+      c.el.style.transform = `translate(${c.x}px, ${-c.y}px) scaleX(${flip})`;
+      if (Math.random() < 0.001) c.vx = -c.vx;
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+
+  onPress(document.body, (x, y) => { Chars.lookAt(x, y); burst(x, y, ['🌼', '🦋', '🌷'], 5, 100); S.pop(); });
+  document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
+  guardKeys(() => {
+    Toddler.audio();
+    const free = cows.filter(c => !c.busy);
+    if (free.length) { const c = pick(free); const r = c.el.getBoundingClientRect(); tapCow(c, r.left + r.width / 2, r.top + r.height / 2); }
+  });
+})();
+</script>
+</body>
+</html>

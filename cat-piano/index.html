@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amna's Games">
+<meta name="theme-color" content="#339af0">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>Cat Piano</title>
+<link rel="stylesheet" href="../shared/toddler.css">
+<style>
+  .wall { --s1: #b197fc; --s2: #d0bfff; }
+  .grid {
+    position: absolute; inset: 0; z-index: 1; display: grid; gap: 2vmin; padding: 2vmin;
+    grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr);
+  }
+  @media (orientation: portrait) { .grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 1fr); } }
+  .key {
+    position: relative; border-radius: 4vmin; display: flex; align-items: flex-end; justify-content: center;
+    background: linear-gradient(var(--light), var(--c) 60%, var(--dark));
+    box-shadow: 0 0 0 4px #fff8e8, 0 8px 0 4px rgba(0,0,0,.2), inset 0 -1.5vmin 0 rgba(0,0,0,.15), inset 0 3px 0 rgba(255,255,255,.5);
+    transition: transform .08s, box-shadow .08s; overflow: visible;
+  }
+  .key::before { content: ''; position: absolute; left: 6%; right: 6%; top: 5%; height: 30%; border-radius: 3vmin;
+                 background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,0)); pointer-events: none; }
+  .key .who { width: 78%; aspect-ratio: 1; margin-bottom: 3%; pointer-events: none; filter: drop-shadow(0 8px 6px rgba(0,0,0,.3)); }
+  .key.hit { transform: translateY(5px); box-shadow: 0 0 0 4px #fff8e8, 0 3px 0 4px rgba(0,0,0,.2), 0 0 50px 14px rgba(255,255,255,.6), inset 0 -0.5vmin 0 rgba(0,0,0,.15); }
+  .key.hit .who { animation: bounce .45s cubic-bezier(.3,1.6,.6,1); }
+  @keyframes bounce {
+    0% { transform: scale(1); } 30% { transform: scale(1.25) rotate(-8deg); } 60% { transform: scale(.95) rotate(6deg); } 100% { transform: scale(1); }
+  }
+  .label { position: absolute; top: 2vmin; left: 3vmin; color: rgba(255,255,255,.9); font-size: 6vmin; font-weight: 800;
+           text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+</style>
+</head>
+<body>
+  <div class="wall"></div>
+  <div class="grid" id="grid"></div>
+
+<script src="../shared/toddler.js"></script>
+<script src="../shared/characters.js"></script>
+<script>
+(function () {
+  const { S, guardKeys, addParentBar, burst } = Toddler;
+  addParentBar();
+  Chars.startBlinking();
+
+  // C major scale, big deep-voiced cat to tiny kitten.
+  const KEYS = [
+    { color: '#ff6b6b', note: 261.6, label: 'C' },
+    { color: '#ff922b', note: 293.7, label: 'D' },
+    { color: '#fcc419', note: 329.6, label: 'E' },
+    { color: '#51cf66', note: 349.2, label: 'F' },
+    { color: '#20c997', note: 392.0, label: 'G' },
+    { color: '#339af0', note: 440.0, label: 'A' },
+    { color: '#845ef7', note: 493.9, label: 'B' },
+    { color: '#f06595', note: 523.3, label: 'C' },
+  ];
+  const CAT_COLORS = ['#ffa94d', '#ced4da', '#f8f9fa', '#ff8787', '#ffd43b', '#b197fc', '#63e6be', '#e599f7'];
+
+  const grid = document.getElementById('grid');
+  const els = KEYS.map((k, i) => {
+    const el = document.createElement('div');
+    el.className = 'key';
+    el.style.setProperty('--c', k.color);
+    el.style.setProperty('--light', Chars.shade(k.color, 35));
+    el.style.setProperty('--dark', Chars.shade(k.color, -25));
+    el.innerHTML = `<span class="label">${k.label}</span><div class="who">${Chars.cat(CAT_COLORS[i])}</div>`;
+    grid.appendChild(el);
+    el.addEventListener('pointerdown', (e) => { Toddler.audio(); play(i, e.clientX, e.clientY); });
+    el.addEventListener('pointerenter', (e) => { if (e.buttons || e.pointerType === 'touch') play(i, e.clientX, e.clientY); });
+    return el;
+  });
+
+  function play(i, x, y) {
+    const el = els[i], k = KEYS[i];
+    S.meow(i / (KEYS.length - 1));
+    S.note(k.note);
+    el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+    setTimeout(() => el.classList.remove('hit'), 450);
+    if (x == null) { const r = el.getBoundingClientRect(); x = r.left + r.width / 2; y = r.top + r.height / 2; }
+    Chars.lookAt(x, y);
+    burst(x, y, ['🎵', '🎶', '💖', '⭐', '🐾'], 7, 130);
+  }
+
+  document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
+  guardKeys((e) => {
+    const code = e.key.length === 1 ? e.key.toLowerCase().charCodeAt(0) : e.keyCode || 0;
+    play(code % KEYS.length);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+/* Shared styles for Amna's games: candy colors, glossy buttons, cartoon characters */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&display=swap');
+
+* { box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+  touch-action: none; cursor: default;
+  font-family: "Baloo 2", "Comic Sans MS", "Chalkboard SE", "Nunito", system-ui, sans-serif;
+}
+body { position: relative; }
+
+/* ---- Striped playroom wall (like a cartoon nursery) ---- */
+.wall {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    repeating-linear-gradient(90deg, var(--s1, #9be7c4) 0 7vmin, var(--s2, #6fd8e6) 7vmin 14vmin);
+}
+.wall::after { /* soft vignette so characters pop */
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(255,255,255,.25), rgba(0,0,0,.18) 90%);
+}
+.floor {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 22%; z-index: 0;
+  background: linear-gradient(#64c9d9, #3fa9c2);
+  box-shadow: 0 -8px 0 rgba(255,255,255,.35);
+}
+
+/* ---- Glossy candy button ---- */
+.candy {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  padding: 2.2vmin 5vmin; border-radius: 100px; border: 0; cursor: pointer;
+  color: #fff; font-family: inherit; font-weight: 800; font-size: 5.5vmin; letter-spacing: .5px;
+  text-shadow: 0 2px 0 rgba(0,0,0,.25), 0 0 8px rgba(0,0,0,.15);
+  background: linear-gradient(var(--c-light, #7ee55a), var(--c, #34c21f) 55%, var(--c-dark, #1f9a10));
+  box-shadow:
+    0 0 0 5px #fff8e8,            /* cream rim */
+    0 0 0 9px var(--rim, #5bb8ff),/* colored rim */
+    0 10px 0 9px rgba(0,0,0,.18), /* thick shadow */
+    inset 0 -6px 0 rgba(0,0,0,.18);
+  transition: transform .08s;
+}
+.candy::before { /* gloss highlight */
+  content: ''; position: absolute; left: 8%; right: 8%; top: 9%; height: 38%;
+  border-radius: 100px; background: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.05));
+}
+.candy:active { transform: translateY(6px); box-shadow: 0 0 0 5px #fff8e8, 0 0 0 9px var(--rim, #5bb8ff), 0 4px 0 9px rgba(0,0,0,.18), inset 0 -3px 0 rgba(0,0,0,.18); }
+
+/* A glossy rounded card / panel */
+.panel {
+  border-radius: 4vmin; padding: 3vmin;
+  background: linear-gradient(#6fc9ff, #2f9df0);
+  box-shadow: 0 0 0 5px #fff8e8, 0 0 0 9px #cfeeff, 0 14px 30px rgba(0,0,0,.25), inset 0 3px 0 rgba(255,255,255,.4);
+}
+
+/* ---- Characters ---- */
+.char { display: block; width: 100%; height: 100%; overflow: visible; }
+.char .eye { transform-box: fill-box; transform-origin: center; transition: transform .08s; }
+.char.blink .eye { transform: scaleY(.08); }
+.char .pupil { transition: transform .15s ease-out; }
+
+/* ---- Parent bar ---- */
+.parent-bar {
+  position: fixed; top: 10px; right: 10px; z-index: 1000;
+  display: flex; gap: 8px; opacity: 0.4;
+}
+.parent-bar:hover { opacity: 1; }
+.pbtn {
+  position: relative; width: 44px; height: 44px; border-radius: 50%;
+  border: none; background: rgba(0,0,0,0.35); color: #fff;
+  font-size: 22px; line-height: 44px; text-align: center; padding: 0;
+  cursor: pointer; overflow: visible;
+}
+.pbtn .ring {
+  position: absolute; inset: -4px; border-radius: 50%;
+  border: 4px solid transparent; border-top-color: #fff;
+  opacity: 0; transform: rotate(0deg);
+}
+.pbtn.holding .ring { opacity: 1; animation: spin 1.2s linear forwards; }
+@keyframes spin { to { transform: rotate(720deg); } }
+
+/* ---- Particles ---- */
+.particle {
+  position: fixed; z-index: 500; pointer-events: none; line-height: 1;
+  transform: translate(-50%, -50%);
+  animation: fly 0.9s cubic-bezier(.2,.8,.3,1) forwards;
+}
+@keyframes fly {
+  0%   { transform: translate(-50%, -50%) scale(0.4) rotate(0); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.2) rotate(var(--rot)); opacity: 0; }
+}
+
+.emoji { line-height: 1; display: inline-block; }
