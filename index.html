@@ -19,8 +19,8 @@
   h1 { margin: calc(3 * var(--u)) auto 0; padding: calc(1.5 * var(--u)) calc(6 * var(--u)); border-radius: 100px; color: #fff; font-size: calc(8 * var(--u));
        background: linear-gradient(#7ad0ff, #2f9df0); text-shadow: 0 3px 0 rgba(0,0,0,.25);
        box-shadow: 0 0 0 5px #fff8e8, 0 0 0 9px #cfeeff, 0 10px 0 9px rgba(0,0,0,.18); }
-  .tiles { flex: 1; display: grid; gap: calc(3 * var(--u)); padding: calc(3 * var(--u)) calc(3 * var(--u)) calc(5 * var(--u)); grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, minmax(0, 1fr)); }
-  @media (orientation: portrait) { .tiles { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, minmax(0, 1fr)); } }
+  .tiles { flex: 1; min-height: 0; display: grid; gap: calc(3 * var(--u)); padding: calc(3 * var(--u)) calc(3 * var(--u)) calc(5 * var(--u)); grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, minmax(0, 1fr)); }
+  @media (orientation: portrait) { .tiles { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, minmax(0, 1fr)); } }
   .tile {
     min-height: 0; min-width: 0;
     position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(1.5 * var(--u));
@@ -55,6 +55,7 @@
       <a class="tile" href="monkey-bananas/index.html" style="--c:#fcc419;--light:#ffe066;--dark:#e67700"><div class="who" id="w6"></div><span class="name">Monkey Bananas</span></a>
       <a class="tile" href="dino-stomp/index.html" style="--c:#20c997;--light:#63e6be;--dark:#0ca678"><div class="who" id="w7"></div><span class="name">Dino Stomp</span></a>
       <a class="tile" href="wheels-on-the-bus/index.html" style="--c:#f06595;--light:#faa2c1;--dark:#c2255c"><div class="who" id="w8"></div><span class="name">Wheels on the Bus</span></a>
+      <a class="tile" href="count-with-me/index.html" style="--c:#e64980;--light:#faa2c1;--dark:#a61e4d"><div class="who" id="w9"></div><span class="name">Count With Me</span></a>
     </div>
   </div>
 <script src="shared/toddler.js"></script>
@@ -68,6 +69,7 @@
   document.getElementById('w6').innerHTML = Chars.monkey('#a0693b');
   document.getElementById('w7').innerHTML = Chars.dino('#51cf66', 'rex');
   document.getElementById('w8').innerHTML = '<span style="font-size:calc(14 * var(--u))">🚌</span>';
+  document.getElementById('w9').innerHTML = '<span style="font-size:calc(12 * var(--u));font-weight:800;color:#fff;white-space:nowrap;text-shadow:0 4px 0 rgba(0,0,0,.25)">1 2 3</span>';
   Chars.startBlinking();
   document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
   Toddler.guardKeys();

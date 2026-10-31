@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amna's Games">
+<meta name="theme-color" content="#339af0">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>Count With Me</title>
+<link rel="stylesheet" href="../shared/toddler.css">
+<style>
+  .wall { --s1: #c3fae8; --s2: #e6fcf5; }
+  .floor { height: 18%; background: linear-gradient(#ffd43b, #fab005); }
+
+  /* Host bean in the corner with a speech bubble */
+  .host { position: absolute; left: calc(2 * var(--u)); bottom: calc(6 * var(--u)); width: calc(22 * var(--u)); height: calc(25 * var(--u)); z-index: 3; }
+  .host .inner { width: 100%; height: 100%; transform-origin: 50% 100%; filter: drop-shadow(0 8px 6px rgba(0,0,0,.3)); }
+  .host.talk .inner { animation: talk .6s ease-in-out; }
+  @keyframes talk { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-6deg) scale(1.04) } 75% { transform: rotate(6deg) scale(1.04) } }
+  .host.dance .inner { animation: dance 1.2s ease-in-out; }
+  @keyframes dance { 0%,100% { transform: translateY(0) } 20%,60% { transform: translateY(calc(-5 * var(--u))) rotate(-10deg) } 40%,80% { transform: translateY(calc(-5 * var(--u))) rotate(10deg) } }
+  .bubble { position: absolute; left: calc(20 * var(--u)); bottom: calc(26 * var(--u)); z-index: 4; pointer-events: none;
+            --c:#4dabf7; --c-light:#a5d8ff; --c-dark:#1c7ed6; --rim:#fff; font-size: calc(4.2 * var(--u)); padding: calc(1.2 * var(--u)) calc(3.5 * var(--u)); transform-origin: left bottom; transition: transform .25s cubic-bezier(.3,1.6,.5,1); }
+  .bubble.hide { transform: scale(0); }
+
+  /* Big running number at the top */
+  .counter { position: absolute; top: calc(3 * var(--u)); left: 50%; transform: translateX(-50%); z-index: 4; pointer-events: none;
+             width: calc(16 * var(--u)); height: calc(16 * var(--u)); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+             font-size: calc(10 * var(--u)); font-weight: 800; color: #fff; text-shadow: 0 3px 0 rgba(0,0,0,.25);
+             background: linear-gradient(#ff8787, #e03131); box-shadow: 0 0 0 5px #fff8e8, 0 0 0 9px #ffc9c9, 0 10px 0 9px rgba(0,0,0,.18); transition: transform .2s; }
+  .counter.pop { animation: cpop .4s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes cpop { 0% { transform: translateX(-50%) scale(1) } 50% { transform: translateX(-50%) scale(1.35) } 100% { transform: translateX(-50%) scale(1) } }
+
+  /* Things to count */
+  .stage { position: absolute; left: calc(24 * var(--u)); right: calc(2 * var(--u)); top: calc(22 * var(--u)); bottom: 20%; z-index: 2; }
+  .item { position: absolute; width: var(--sz); height: var(--sz); transform: translate(-50%, -50%) scale(0); transition: transform .4s cubic-bezier(.3,1.6,.5,1); }
+  .item.show { transform: translate(-50%, -50%) scale(1); }
+  .item .who { width: 100%; height: 100%; filter: drop-shadow(0 8px 6px rgba(0,0,0,.3)); transform-origin: 50% 100%; }
+  .item.hit .who { animation: hit .5s cubic-bezier(.3,1.6,.5,1); }
+  @keyframes hit { 0% { transform: scale(1) } 40% { transform: scale(1.3) translateY(-12%) rotate(-8deg) } 100% { transform: scale(1) } }
+  .item.wiggle .who { animation: wiggle .4s; }
+  @keyframes wiggle { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-10deg) } 75% { transform: rotate(10deg) } }
+  .item.done .who { filter: drop-shadow(0 8px 6px rgba(0,0,0,.3)) saturate(1.1); }
+  .badge { position: absolute; right: -8%; top: -8%; width: 40%; height: 40%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+           background: linear-gradient(#ffe066, #fab005); border: 4px solid #222; color: #222; font-weight: 800; font-size: calc(var(--sz) * .26);
+           transform: scale(0); transition: transform .3s cubic-bezier(.3,1.8,.5,1); }
+  .item.done .badge { transform: scale(1); }
+
+  /* Celebration banner */
+  .banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(0); z-index: 6; pointer-events: none;
+            --c:#51cf66; --c-light:#8ce99a; --c-dark:#2f9e44; --rim:#fff; font-size: calc(8 * var(--u)); padding: calc(2 * var(--u)) calc(6 * var(--u)); transition: transform .35s cubic-bezier(.3,1.6,.5,1); }
+  .banner.show { transform: translate(-50%, -50%) scale(1); }
+</style>
+</head>
+<body>
+  <div class="wall"></div>
+  <div class="floor"></div>
+  <div class="counter" id="counter">0</div>
+  <div class="host" id="host"><div class="inner"></div></div>
+  <div class="candy bubble" id="bubble">Let's count!</div>
+  <div class="stage" id="stage"></div>
+  <div class="candy banner" id="banner"></div>
+
+<script src="../shared/toddler.js"></script>
+<script src="../shared/characters.js"></script>
+<script>
+(function () {
+  const { S, guardKeys, onPress, addParentBar, rand, pick, burst } = Toddler;
+  addParentBar();
+  Chars.startBlinking();
+  const U = () => Toddler.u();
+
+  const host = document.getElementById('host'), hostInner = host.querySelector('.inner');
+  const bubble = document.getElementById('bubble'), counter = document.getElementById('counter');
+  const stage = document.getElementById('stage'), banner = document.getElementById('banner');
+  const setHost = (m) => hostInner.innerHTML = Chars.bean('#b197fc', m);
+  setHost('happy');
+
+  // ---- Speech (built into iPad/Mac browsers), with a musical note underneath ----
+  const WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+  function say(text, rate = 0.9) {
+    try {
+      if (!('speechSynthesis' in window)) return;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US'; u.rate = rate; u.pitch = 1.25;
+      const v = speechSynthesis.getVoices().find(v => /en[-_]US/i.test(v.lang) && /Samantha|Google US|Zira|Female|Karen|Moira/i.test(v.name));
+      if (v) u.voice = v;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  if ('speechSynthesis' in window) speechSynthesis.getVoices();
+  const NOTES = [0, 262, 294, 330, 349, 392, 440, 494, 523, 587, 659];
+
+  function talk(text) {
+    bubble.textContent = text; bubble.classList.remove('hide');
+    host.classList.remove('talk'); void host.offsetWidth; host.classList.add('talk');
+    say(text);
+  }
+
+  // ---- Sets of things to count ----
+  const SETS = [
+    { name: 'cats',    make: () => Chars.cat(pick(['#ffa94d', '#ced4da', '#ff8787', '#ffd43b', '#b197fc'])), ar: 1 },
+    { name: 'dinos',   make: () => Chars.dino(pick(['#51cf66', '#4dabf7', '#ff922b']), pick(['rex', 'neck', 'tri'])), ar: 1.3 },
+    { name: 'fish',    make: () => Chars.fish(pick(['#ffd43b', '#ff8787', '#63e6be', '#da77f2', '#74c0fc'])), ar: 1.4 },
+    { name: 'sharks',  make: () => Chars.shark(pick(['#4dabf7', '#f783ac', '#ffd43b'])), ar: 1.6 },
+    { name: 'cows',    make: () => Chars.cow(pick(['#333', '#8d5524', '#e8590c', '#845ef7'])), ar: 1.4 },
+    { name: 'monkeys', make: () => Chars.monkey('#a0693b'), ar: .85 },
+    { name: 'bananas', make: () => Chars.banana(), ar: 1 },
+    { name: 'beans',   make: () => Chars.bean(pick(['#ff8787', '#69db7c', '#74c0fc', '#da77f2', '#ffa94d']), pick(['happy', 'silly', 'wow'])), ar: .87 },
+    { name: 'eggs',    make: () => Chars.egg(pick(['#51cf66', '#4dabf7', '#ff922b'])), ar: .8 },
+  ];
+
+  let round = 0, target = 0, counted = 0, items = [], busy = false, lastSet = null;
+
+  function maxFor(round) { return round < 2 ? 3 : round < 5 ? 5 : round < 8 ? 7 : 10; }
+
+  function layout(n, ar) {
+    // Grid cells that fit the stage, then jitter inside each cell so it feels organic.
+    const r = stage.getBoundingClientRect();
+    const cols = n <= 3 ? n : n <= 6 ? 3 : n <= 8 ? 4 : 5;
+    const rows = Math.ceil(n / cols);
+    const cw = r.width / cols, ch = r.height / rows;
+    const size = Math.min(cw * .82, ch * .82 * ar, 40 * U());
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, rw = Math.floor(i / cols);
+      const inRow = Math.min(cols, n - rw * cols), offset = (cols - inRow) * cw / 2;
+      pts.push({ x: offset + c * cw + cw / 2 + rand(-cw * .06, cw * .06), y: rw * ch + ch / 2 + rand(-ch * .06, ch * .06), size });
+    }
+    return pts;
+  }
+
+  function newRound() {
+    busy = true; counted = 0;
+    items.forEach(it => it.el.remove()); items = [];
+    counter.textContent = '0';
+    let set; do { set = pick(SETS); } while (set === lastSet); lastSet = set;
+    target = 1 + Math.floor(Math.random() * maxFor(round));
+    if (round === 0) target = Math.max(2, target);
+    setHost('happy');
+    talk(`Let's count the ${set.name}!`);
+    const pts = layout(target, set.ar);
+    pts.forEach((p, i) => {
+      const el = document.createElement('div');
+      el.className = 'item';
+      el.style.setProperty('--sz', p.size + 'px');
+      el.style.left = p.x + 'px'; el.style.top = p.y + 'px';
+      el.innerHTML = `<div class="who">${set.make()}</div><div class="badge"></div>`;
+      stage.appendChild(el);
+      const it = { el, done: false };
+      items.push(it);
+      setTimeout(() => { el.classList.add('show'); S.pop(); }, 500 + i * 160);
+      el.addEventListener('pointerdown', (e) => { e.stopPropagation(); Toddler.audio(); tap(it, e.clientX, e.clientY); });
+    });
+    setTimeout(() => { busy = false; }, 500 + target * 160 + 300);
+  }
+
+  function tap(it, x, y) {
+    if (busy) return;
+    if (it.done) {
+      it.el.classList.remove('wiggle'); void it.el.offsetWidth; it.el.classList.add('wiggle');
+      S.bloop(); say(WORDS[parseInt(it.el.querySelector('.badge').textContent)]);
+      return;
+    }
+    it.done = true; counted++;
+    it.el.classList.add('done', 'hit');
+    it.el.querySelector('.badge').textContent = counted;
+    counter.textContent = counted; counter.classList.remove('pop'); void counter.offsetWidth; counter.classList.add('pop');
+    S.note(NOTES[counted] || 700); say(WORDS[counted] || String(counted));
+    burst(x, y, ['⭐', '✨', '💛'], 6, 12 * U());
+    setTimeout(() => it.el.classList.remove('hit'), 500);
+    if (counted === target) finish();
+  }
+
+  function finish() {
+    busy = true; round++;
+    const name = lastSet.name === 'fish' ? (target === 1 ? 'fish' : 'fish') : (target === 1 ? lastSet.name.replace(/s$/, '').replace(/ie$/, 'y') : lastSet.name);
+    setTimeout(() => {
+      banner.textContent = `${target} ${name}!`; banner.classList.add('show');
+      bubble.classList.add('hide');
+      setHost('silly'); host.classList.add('dance');
+      S.chime(); setTimeout(() => S.giggle(), 400);
+      say(`${WORDS[target] || target} ${name}! Hooray!`, 0.95);
+      const r = banner.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, ['🎉', '🎊', '⭐', '💖', '🌟'], 18, 28 * U());
+    }, 500);
+    setTimeout(() => { banner.classList.remove('show'); host.classList.remove('dance'); }, 3200);
+    setTimeout(newRound, 3600);
+  }
+
+  // Tap the host to hear the prompt again
+  host.addEventListener('pointerdown', (e) => { e.stopPropagation(); Toddler.audio(); if (!busy) talk(`Let's count the ${lastSet.name}! ${WORDS[counted] ? 'We have ' + WORDS[counted] : ''}`); });
+
+  onPress(document.body, (x, y) => { Chars.lookAt(x, y); burst(x, y, ['✨'], 2, 8 * U()); });
+  document.addEventListener('pointermove', (e) => Chars.lookAt(e.clientX, e.clientY), { passive: true });
+  guardKeys(() => {
+    Toddler.audio();
+    const next = items.find(it => !it.done);
+    if (next) { const r = next.el.getBoundingClientRect(); tap(next, r.left + r.width / 2, r.top + r.height / 2); }
+  });
+  addEventListener('resize', () => { if (!busy) { const pts = layout(items.length, lastSet.ar); items.forEach((it, i) => { it.el.style.setProperty('--sz', pts[i].size + 'px'); it.el.style.left = pts[i].x + 'px'; it.el.style.top = pts[i].y + 'px'; }); } });
+
+  setTimeout(newRound, 400);
+})();
+</script>
+</body>
+</html>
